@@ -1,0 +1,487 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #0ea5ff;
+}
+
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-slate-800 antialiased;
+}
+
+.page-layout {
+  @apply bg-gray-50 min-h-screen;
+}
+
+.page-layout--white {
+  @apply bg-white;
+}
+
+.page-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.section {
+  @apply py-8;
+}
+
+.section--compact {
+  @apply py-6;
+}
+
+.section-heading {
+  @apply flex items-center justify-between mb-6;
+}
+
+.section-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.section-title--lg {
+  @apply text-4xl font-bold text-gray-900;
+}
+
+.section-subtitle {
+  @apply text-gray-600;
+}
+
+.section-subtitle--large {
+  @apply text-lg;
+}
+
+.card {
+  @apply bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow;
+}
+
+.card--page {
+  @apply p-8 shadow-sm;
+}
+
+.card--course {
+  @apply overflow-hidden;
+}
+
+.card__header {
+  @apply mb-2;
+}
+
+.card__body {
+  @apply p-6;
+}
+
+.card__media {
+  @apply relative w-full h-40 bg-gray-200 overflow-hidden;
+}
+
+.card__favorite {
+  @apply absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-red-600 transition;
+}
+
+.card__media--hero {
+  @apply w-full h-96;
+}
+
+.card__media--compact {
+  @apply h-48;
+}
+
+.card__content {
+  @apply p-4;
+}
+
+.card__title {
+  @apply text-xl font-semibold text-gray-900 mb-2;
+}
+
+.card__description {
+  @apply text-gray-600 text-sm mb-4;
+}
+
+.card__badge {
+  @apply text-xs font-semibold text-gray-600 uppercase;
+}
+
+.card__footer {
+  @apply flex items-center justify-between text-xs text-gray-600;
+}
+
+.grid-cards {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 auto-rows-fr;
+}
+
+.grid-cards--2 {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-fr;
+}
+
+.button {
+  @apply font-medium rounded-lg transition-colors;
+}
+
+.button--primary {
+  @apply bg-gray-900 text-white py-2 px-6 hover:bg-gray-800;
+}
+
+.button--secondary {
+  @apply bg-gray-100 text-gray-900 py-2 px-4 hover:bg-gray-200;
+}
+
+.button--icon {
+  @apply w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold;
+}
+
+.button--full {
+  @apply w-full;
+}
+
+.link {
+  @apply font-medium transition-colors;
+}
+
+.link--small {
+  @apply text-sm text-gray-700 hover:text-gray-900;
+}
+
+.link--muted {
+  @apply text-sm text-gray-600 hover:text-gray-900;
+}
+
+.form-field {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-500;
+}
+
+.form-group {
+  @apply mb-4;
+}
+
+.form-tags {
+  @apply flex gap-2 flex-wrap;
+}
+
+.tag {
+  @apply px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm cursor-pointer hover:bg-gray-200;
+}
+
+.toggle {
+  @apply w-14 h-8 bg-gray-300 rounded-full cursor-pointer relative transition-all;
+}
+
+.toggle-handle {
+  @apply absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-all;
+}
+
+.tabs {
+  @apply flex gap-8 border-b border-gray-200;
+}
+
+.tab-item {
+  @apply py-4 font-medium border-b-2 transition-colors;
+}
+
+.tab-item--active {
+  @apply text-gray-900 border-gray-900;
+}
+
+.tab-item--inactive {
+  @apply text-gray-600 border-transparent hover:text-gray-900;
+}
+
+.navbar {
+  @apply bg-white border-b border-gray-200 relative;
+  z-index: 50;
+}
+
+.navbar__inner {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.hero-banner {
+  @apply relative;
+  z-index: 0;
+}
+
+.navbar__row {
+  @apply flex items-center justify-between h-16 gap-4;
+}
+
+.navbar__brand {
+  @apply flex items-center gap-2;
+}
+
+.navbar__logo {
+  @apply w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center;
+}
+
+.navbar__title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.navbar__nav {
+  @apply hidden md:flex items-center gap-8;
+}
+
+.navbar__link {
+  @apply text-gray-700 hover:text-gray-900 font-medium;
+}
+
+.navbar__actions {
+  @apply flex items-center gap-4;
+}
+
+.navbar__search {
+  @apply hidden lg:flex items-center gap-2;
+}
+
+.navbar__search-input {
+  @apply w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500;
+}
+
+.navbar__search-button {
+  @apply px-3 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200;
+}
+
+.navbar__action {
+  @apply relative text-gray-600 hover:text-gray-900;
+}
+
+.navbar__profile-button {
+  @apply button button--icon;
+}
+
+.search-form {
+  @apply flex-1 relative w-full;
+}
+
+.search-panel {
+  @apply flex items-center gap-4 mb-6;
+}
+
+.search-input {
+  @apply form-field;
+}
+
+.search-button {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600;
+}
+
+.filter-buttons {
+  @apply flex gap-3 flex-wrap;
+}
+
+.filter-button {
+  @apply px-4 py-2 rounded-full font-medium transition-colors border border-gray-300;
+}
+
+.filter-button--active {
+  @apply bg-gray-800 text-white border-transparent;
+}
+
+.filter-button--inactive {
+  @apply bg-white text-gray-700 hover:border-gray-400;
+}
+
+.hero-banner {
+  @apply relative;
+}
+
+.hero-overlay {
+  @apply absolute inset-0 bg-slate-950/70 backdrop-blur-3xl;
+}
+
+.hero-content {
+  @apply absolute inset-0 flex flex-col justify-center pt-24 pb-16;
+}
+
+.hero-panel {
+  @apply self-start bg-gray-800 rounded-lg p-8 w-full md:w-96 flex flex-col gap-6 mt-28 lg:mt-32;
+}
+
+.hero-grid {
+  @apply grid gap-8 lg:grid-cols-[1.5fr_0.9fr] items-start;
+}
+
+.hero-summary {
+  @apply flex flex-col gap-4 mt-24 lg:mt-28;
+}
+
+.course-panel-image {
+  filter: blur(1.5px);
+}
+
+.hero-description {
+  @apply text-gray-200 text-lg mt-6;
+}
+
+.course-category {
+  @apply text-white text-sm font-medium uppercase;
+}
+
+.course-meta {
+  @apply flex flex-wrap items-center gap-4 mt-4;
+}
+
+.course-meta__item {
+  @apply text-white text-sm;
+}
+
+.course-meta__favorite {
+  @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-slate-300 hover:bg-white/20 transition-colors duration-200;
+}
+
+.course-meta__favorite--active {
+  @apply bg-red-500 text-white;
+}
+
+.course-layout {
+  @apply grid gap-8 lg:grid-cols-[2fr_1fr];
+}
+
+.course-main {
+  @apply lg:col-span-2;
+}
+
+.course-sidebar {
+  @apply lg:col-span-1;
+}
+
+.course-section {
+  @apply mb-12 pb-12;
+}
+
+.course-row {
+  @apply grid gap-4;
+}
+
+.course-card-row {
+  @apply card card--course flex flex-col md:flex-row gap-4;
+}
+
+.course-card-row__media {
+  @apply md:w-48 h-32 md:h-auto flex-shrink-0 overflow-hidden bg-gray-200;
+}
+
+.course-card-row__body {
+  @apply p-4 flex-1 flex flex-col justify-between;
+}
+
+.course-card-row__actions {
+  @apply p-6 flex items-center;
+}
+
+.course-progress {
+  @apply mb-4;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar__fill {
+  @apply bg-gray-800 h-2 rounded-full;
+}
+
+.course-section {
+  @apply mb-12 pb-12;
+}
+
+.course-row {
+  @apply grid gap-4;
+}
+
+.course-card-row {
+  @apply card card--course flex flex-col md:flex-row gap-4;
+}
+
+.course-card-row__media {
+  @apply md:w-48 h-32 md:h-auto flex-shrink-0 overflow-hidden bg-gray-200;
+}
+
+.course-card-row__body {
+  @apply p-4 flex-1 flex flex-col justify-between;
+}
+
+.course-card-row__actions {
+  @apply p-6 flex items-center;
+}
+
+.course-progress {
+  @apply mb-4;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar__fill {
+  @apply bg-gray-800 h-2 rounded-full;
+}
+
+.info-box {
+  @apply bg-gray-50 rounded-lg p-6 sticky top-4;
+}
+
+.info-box__title {
+  @apply font-semibold text-gray-900 mb-4;
+}
+
+.info-box__item {
+  @apply space-y-4 text-sm;
+}
+
+.info-box__label {
+  @apply text-gray-600;
+}
+
+.info-box__value {
+  @apply font-medium text-gray-900;
+}
+
+.settings-grid {
+  @apply grid grid-cols-1 lg:grid-cols-4 gap-8;
+}
+
+.settings-card {
+  @apply bg-white rounded-lg p-8 shadow-sm;
+}
+
+.settings-section {
+  @apply pb-8 border-b border-gray-200 mb-8;
+}
+
+.settings-header {
+  @apply text-lg font-semibold text-gray-900 mb-6;
+}
+
+.settings-row {
+  @apply flex items-center gap-6 mb-6;
+}
+
+.settings-summary {
+  @apply flex items-center justify-between;
+}
+
+.settings-input {
+  @apply form-field;
+}
+
+.settings-button {
+  @apply button button--primary;
+}
+
+.profile-avatar {
+  @apply w-20 h-20 rounded-full object-cover;
+}
+
+.profile-button {
+  @apply px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50;
+}
+
+.profile-tag {
+  @apply tag;
+}
