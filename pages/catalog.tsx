@@ -2,104 +2,7 @@ import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
-
-type Course = {
-  id: string
-  image: string
-  category: string
-  title: string
-  description: string
-  tags: string[]
-  duration: string
-  students: number
-}
-
-type CatalogCategory = 'Все' | 'Разработка' | 'Дизайн' | 'Бизнес' | 'Маркетинг' | 'Данные'
-
-const allCourses: Course[] = [
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'ДИЗАЙН',
-    title: 'Основы UI дизайна',
-    description: 'Освойте принципы дизайна интерфейсов, теорию цвета и типографику.',
-    tags: ['Дизайн', 'Начальный'],
-    duration: '4ч 20м',
-    students: 1200
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'РАЗРАБОТКА',
-    title: 'Fullstack Next.js 14',
-    description: 'Создавайте масштабируемые приложения с новейшими возможностями Next.js.',
-    tags: ['Разработка', 'Продвинутый'],
-    duration: '8ч 15м',
-    students: 2300
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'БИЗНЕС',
-    title: 'Продакт-менеджмент',
-    description: 'Научитесь управлять продуктовыми командами и определять стратегию.',
-    tags: ['Бизнес', 'Средний'],
-    duration: '6ч 00м',
-    students: 1500
-  },
-  {
-    id: '4',
-    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'ДАННЫЕ',
-    title: 'Data Science с Python',
-    description: 'Анализируйте данные и создавайте визуализации с помощью Pandas.',
-    tags: ['Данные', 'Начальный'],
-    duration: '12ч 45м',
-    students: 2100
-  },
-  {
-    id: '5',
-    image: 'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'РАЗРАБОТКА',
-    title: 'JavaScript для начинающих',
-    description: 'Изучите основы программирования на JavaScript с нуля.',
-    tags: ['Разработка', 'Начальный'],
-    duration: '10ч 30м',
-    students: 3100
-  },
-  {
-    id: '6',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'ДИЗАЙН',
-    title: 'Брендинг и айдентика',
-    description: 'Создавайте запоминающиеся бренды и визуальные системы.',
-    tags: ['Дизайн', 'Продвинутый'],
-    duration: '5ч 45м',
-    students: 890
-  },
-  {
-    id: '7',
-    image: 'https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'МАРКЕТИНГ',
-    title: 'Цифровой маркетинг',
-    description: 'Освойте SEO, контент-маркетинг и социальные сети.',
-    tags: ['Маркетинг', 'Средний'],
-    duration: '7ч 20м',
-    students: 1340
-  },
-  {
-    id: '8',
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'БИЗНЕС',
-    title: 'Финансовая грамотность',
-    description: 'Управляйте личными финансами и инвестициями эффективно.',
-    tags: ['Бизнес', 'Начальный'],
-    duration: '9ч 10м',
-    students: 2450
-  }
-]
-
-const categories: CatalogCategory[] = ['Все', 'Разработка', 'Дизайн', 'Бизнес', 'Маркетинг', 'Данные']
+import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
 
 export default function Catalog(): JSX.Element {
   const router = useRouter()
@@ -120,8 +23,8 @@ export default function Catalog(): JSX.Element {
     router.push(path)
   }
 
-  const filteredCourses = allCourses.filter((course) => {
-    const matchesCategory = activeCategory === 'Все' ? true : course.category.includes(activeCategory.toUpperCase())
+  const filteredCourses = courses.filter((course) => {
+    const matchesCategory = activeCategory === 'Все' ? true : course.category === activeCategory.toUpperCase()
     const query = searchTerm.trim().toLowerCase()
     const matchesSearch =
       !query ||
@@ -159,7 +62,7 @@ export default function Catalog(): JSX.Element {
           </div>
 
           <div className="filter-buttons">
-            {categories.map((category) => (
+            {catalogCategories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}

@@ -1,75 +1,7 @@
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import Link from 'next/link'
-
-type Course = {
-  id: string
-  image: string
-  category: string
-  title: string
-  description: string
-  tags: string[]
-  duration: string
-  students: number
-  progress?: number
-}
-
-const recommendedCourses: Course[] = [
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    category: 'ДИЗАЙН',
-    title: 'Основы UI дизайна',
-    description: 'Освойте принципы дизайна интерфейсов, теорию цвета и типографику.',
-    tags: ['Дизайн', 'Начальный'],
-    duration: '4ч 20м',
-    students: 1200
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200',
-    category: 'РАЗРАБОТКА',
-    title: 'Fullstack Next.js 14',
-    description: 'Создавайте масштабируемые приложения с новейшими возможностями Next.js.',
-    tags: ['Разработка', 'Продвинутый'],
-    duration: '8ч 15м',
-    students: 2300
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200',
-    category: 'БИЗНЕС',
-    title: 'Продакт-менеджмент',
-    description: 'Научитесь управлять продуктовыми командами и определять стратегию.',
-    tags: ['Бизнес', 'Средний'],
-    duration: '6ч 00м',
-    students: 1500
-  },
-  {
-    id: '4',
-    image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200',
-    category: 'ДАННЫЕ',
-    title: 'Data Science с Python',
-    description: 'Анализируйте данные и создавайте визуализации с помощью Pandas.',
-    tags: ['Данные', 'Начальный'],
-    duration: '12ч 45м',
-    students: 2100
-  }
-]
-
-const ongoingCourses: Course[] = [
-  {
-    id: 'ongoing-1',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200',
-    category: 'РАЗРАБОТКА',
-    title: 'Продвинутые паттерны React',
-    description: 'Паттерны и лучшие практики для профессиональной разработки.',
-    tags: ['Разработка', 'Продвинутый'],
-    duration: '4ч 20м',
-    students: 0,
-    progress: 65
-  }
-]
+import { ongoingCourses, recommendedCourses } from '../lib/data/courses'
 
 export default function Home(): JSX.Element {
   return (

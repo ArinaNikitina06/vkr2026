@@ -26,13 +26,16 @@ export default function Header(): JSX.Element {
 
           <nav className="navbar__nav">
             <Link href="/" className="navbar__link">
-              Dashboard
+              Главная
             </Link>
             <Link href="/catalog" className="navbar__link">
               Каталог
             </Link>
             <Link href="/my-learning" className="navbar__link">
-              Мое обучение
+              Мои курсы
+            </Link>
+            <Link href="/settings" className="navbar__link">
+              Настройки
             </Link>
           </nav>
 
