@@ -65,7 +65,7 @@ body {
 }
 
 .card--course {
-  @apply overflow-hidden;
+  @apply overflow-hidden h-full flex flex-col;
 }
 
 .card__header {
@@ -93,7 +93,7 @@ body {
 }
 
 .card__content {
-  @apply p-4;
+  @apply p-4 flex flex-1 flex-col;
 }
 
 .card__title {
@@ -108,8 +108,24 @@ body {
   @apply text-xs font-semibold text-gray-600 uppercase;
 }
 
+.card__badge--link {
+  @apply hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded-sm;
+}
+
+.card__title-link {
+  @apply block focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded-sm;
+}
+
 .card__footer {
   @apply flex items-center justify-between text-xs text-gray-600;
+}
+
+.card__bottom {
+  @apply mt-auto;
+}
+
+.card__price {
+  @apply mb-3 rounded-lg bg-sky-50 px-3 py-2 text-base font-bold text-sky-700 ring-1 ring-sky-100;
 }
 
 .card__attributes {
@@ -118,6 +134,10 @@ body {
 
 .card__attributes span {
   @apply px-2 py-1 rounded-md bg-gray-100;
+}
+
+.card__attributes a {
+  @apply px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
 }
 
 .card__actions {

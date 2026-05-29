@@ -43,6 +43,10 @@ export default function CourseCard({
 }: CourseCardProps): JSX.Element {
   const [favorite, setFavorite] = useState(false)
   const [liked, setLiked] = useState(false)
+  const visibleTags = tags.filter((tag) => (
+    tag.toLowerCase() !== level?.toLowerCase() &&
+    tag.toLowerCase() !== category.toLowerCase()
+  ))
 
   const handleBookmark = () => {
     setFavorite((value) => !value)
@@ -74,39 +78,55 @@ export default function CourseCard({
     </div>
   ) : null
 
+  const courseTitle = href ? (
+    <Link href={href} className="card__title-link">
+      <h3 className="card__title line-clamp-2">{title}</h3>
+    </Link>
+  ) : (
+    <h3 className="card__title line-clamp-2">{title}</h3>
+  )
+
   const content = (
     <div className="card__content">
       <div className="card__header">
-        <span className="card__badge">{category}</span>
+        <Link href={`/catalog?category=${encodeURIComponent(category)}`} className="card__badge card__badge--link">
+          {category}
+        </Link>
       </div>
 
-      <h3 className="card__title line-clamp-2">{title}</h3>
+      {courseTitle}
 
       {description && variant === 'full' && (
         <p className="card__description line-clamp-2">{description}</p>
       )}
 
-      {tags.length > 0 && (
+      {visibleTags.length > 0 && (
         <div className="form-tags mb-3">
-          {tags.map((tag) => (
-            <span key={tag} className="tag">
+          {visibleTags.map((tag) => (
+            <Link key={tag} href={`/catalog?tag=${encodeURIComponent(tag)}`} className="tag">
               {tag}
-            </span>
+            </Link>
           ))}
         </div>
       )}
 
       <div className="card__attributes">
-        {level && <span>{level}</span>}
+        {level && (
+          <Link href={`/catalog?level=${encodeURIComponent(level)}`}>
+            {level}
+          </Link>
+        )}
         {rating && <span>Рейтинг {rating.toFixed(1)}</span>}
-        {price && <span>{price}</span>}
       </div>
 
       <RecommendationReason reasons={reasons} />
 
-      <div className="card__footer">
-        {duration && <span>⏱ {duration}</span>}
-        {students && <span>🧑‍🎓 +{(students / 1000).toFixed(1)}k</span>}
+      <div className="card__bottom">
+        {price && <div className="card__price">{price}</div>}
+        <div className="card__footer">
+          {duration && <span>⏱ {duration}</span>}
+          {students && <span>🧑‍🎓 +{(students / 1000).toFixed(1)}k</span>}
+        </div>
       </div>
     </div>
   )
@@ -114,7 +134,13 @@ export default function CourseCard({
   return (
     <div className="card card--course">
       <div className="card__media">
-        <img src={image} alt={title} className="card__image" />
+        {href ? (
+          <Link href={href} aria-label={`Открыть курс ${title}`}>
+            <img src={image} alt={title} className="card__image" />
+          </Link>
+        ) : (
+          <img src={image} alt={title} className="card__image" />
+        )}
         <button
           type="button"
           onClick={handleBookmark}
@@ -127,9 +153,7 @@ export default function CourseCard({
       </div>
       {href ? (
         <>
-          <Link href={href} className="block">
-            {content}
-          </Link>
+          {content}
           {actions}
         </>
       ) : (

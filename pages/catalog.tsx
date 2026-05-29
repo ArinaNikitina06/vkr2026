@@ -3,35 +3,89 @@ import CourseCard from '../components/CourseCard'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
+import type { CourseLevel } from '../lib/types'
+
+type CatalogLevel = 'Все' | CourseLevel
+
+const catalogLevels: CatalogLevel[] = ['Все', 'Начальный', 'Средний', 'Продвинутый']
 
 export default function Catalog(): JSX.Element {
   const router = useRouter()
-  const { search } = router.query
+  const { category, level, search, tag } = router.query
   const [activeCategory, setActiveCategory] = useState<CatalogCategory>('Все')
+  const [activeLevel, setActiveLevel] = useState<CatalogLevel>('Все')
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   useEffect(() => {
     if (typeof search === 'string') {
       setSearchTerm(search)
     }
-  }, [search])
+
+    if (typeof tag === 'string') {
+      setSearchTerm(tag)
+    }
+
+    if (typeof category === 'string') {
+      const normalizedCategory = catalogCategories.find((item) => (
+        item.toLowerCase() === category.toLowerCase() ||
+        item.toUpperCase() === category.toUpperCase()
+      ))
+
+      setActiveCategory(normalizedCategory ?? 'Все')
+    }
+
+    if (typeof level === 'string') {
+      const normalizedLevel = catalogLevels.find((item) => item.toLowerCase() === level.toLowerCase())
+
+      setActiveLevel(normalizedLevel ?? 'Все')
+    }
+  }, [category, level, search, tag])
+
+  const updateFilters = (nextFilters: {
+    category?: CatalogCategory
+    level?: CatalogLevel
+    search?: string
+  }) => {
+    const nextCategory = nextFilters.category ?? activeCategory
+    const nextLevel = nextFilters.level ?? activeLevel
+    const nextSearch = nextFilters.search ?? searchTerm
+    const params = new URLSearchParams()
+
+    setActiveCategory(nextCategory)
+    setActiveLevel(nextLevel)
+    setSearchTerm(nextSearch)
+
+    if (nextSearch.trim()) {
+      params.set('search', nextSearch.trim())
+    }
+
+    if (nextCategory !== 'Все') {
+      params.set('category', nextCategory)
+    }
+
+    if (nextLevel !== 'Все') {
+      params.set('level', nextLevel)
+    }
+
+    const query = params.toString()
+    router.push(query ? `/catalog?${query}` : '/catalog')
+  }
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const query = searchTerm.trim()
-    const path = query ? `/catalog?search=${encodeURIComponent(query)}` : '/catalog'
-    router.push(path)
+    updateFilters({ search: searchTerm })
   }
 
   const filteredCourses = courses.filter((course) => {
     const matchesCategory = activeCategory === 'Все' ? true : course.category === activeCategory.toUpperCase()
+    const matchesLevel = activeLevel === 'Все' ? true : course.level === activeLevel
     const query = searchTerm.trim().toLowerCase()
     const matchesSearch =
       !query ||
       [course.title, course.description, course.category, ...(course.tags || [])]
         .some((value) => value.toLowerCase().includes(query))
 
-    return matchesCategory && matchesSearch
+    return matchesCategory && matchesLevel && matchesSearch
   })
 
   return (
@@ -65,12 +119,26 @@ export default function Catalog(): JSX.Element {
             {catalogCategories.map((category) => (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => updateFilters({ category })}
                 className={`filter-button ${
                   activeCategory === category ? 'filter-button--active' : 'filter-button--inactive'
                 }`}
               >
                 {category}
+              </button>
+            ))}
+          </div>
+
+          <div className="filter-buttons mt-4">
+            {catalogLevels.map((levelItem) => (
+              <button
+                key={levelItem}
+                onClick={() => updateFilters({ level: levelItem })}
+                className={`filter-button ${
+                  activeLevel === levelItem ? 'filter-button--active' : 'filter-button--inactive'
+                }`}
+              >
+                {levelItem}
               </button>
             ))}
           </div>
