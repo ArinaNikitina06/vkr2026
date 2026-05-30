@@ -18,6 +18,7 @@ export default function CoursePage(): JSX.Element {
   const router = useRouter()
   const [favorite, setFavorite] = useState(false)
   const [enrolled, setEnrolled] = useState(false)
+  const [error, setError] = useState('')
   const id = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id
   const course = getCourseById(id)
   const includes = course.includes ?? []
@@ -34,6 +35,7 @@ export default function CoursePage(): JSX.Element {
       .then((data: RecommendationsResponse) => {
         setSimilarCourses(data.sections[0]?.items ?? [])
       })
+      .catch(() => setError('Не удалось загрузить похожие курсы.'))
 
     fetch('/api/interactions', {
       method: 'POST',
@@ -45,13 +47,24 @@ export default function CoursePage(): JSX.Element {
   }, [id])
 
   const enrollCourse = async () => {
-    await fetch('/api/courses/enroll', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ courseId: course.id })
-    })
+    setError('')
+
+    try {
+      const response = await fetch('/api/courses/enroll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ courseId: course.id })
+      })
+
+      if (!response.ok) {
+        throw new Error('Enroll request failed')
+      }
+    } catch {
+      setError('Не удалось записаться на курс. Попробуйте ещё раз.')
+      return
+    }
 
     setEnrolled(true)
   }
@@ -78,7 +91,7 @@ export default function CoursePage(): JSX.Element {
                       type="button"
                       className={`course-meta__favorite ${favorite ? 'course-meta__favorite--active' : ''}`}
                       aria-pressed={favorite}
-                      aria-label={favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+                      aria-label={`${favorite ? 'Убрать из избранного' : 'Добавить в избранное'}: ${course.title}`}
                       onClick={() => setFavorite((prev) => !prev)}
                     >
                       <span>{favorite ? '❤️' : '🤍'}</span>
@@ -138,7 +151,11 @@ export default function CoursePage(): JSX.Element {
                 <div className="space-y-3">
                   {curriculum.map((section) => (
                     <div key={section.title} className="card card--course p-4 rounded-lg">
-                      <button className="w-full flex items-center justify-between text-left">
+                      <button
+                        className="w-full flex items-center justify-between text-left"
+                        type="button"
+                        aria-label={`Открыть раздел ${section.title}`}
+                      >
                         <div>
                           <h3 className="font-semibold text-gray-900">{section.title}</h3>
                           <p className="text-sm text-gray-600">{section.sections} уроков</p>
@@ -186,6 +203,12 @@ export default function CoursePage(): JSX.Element {
         {enrolled && (
           <section className="page-container section--compact">
             <Toast tone="success">Запись на курс сохранена в прототипе</Toast>
+          </section>
+        )}
+
+        {error && (
+          <section className="page-container section--compact">
+            <Toast tone="error">{error}</Toast>
           </section>
         )}
 

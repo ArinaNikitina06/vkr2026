@@ -1,6 +1,7 @@
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import EmptyState from '../components/EmptyState'
+import ErrorState from '../components/ErrorState'
 import RecommendationSection from '../components/RecommendationSection'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
@@ -45,23 +46,36 @@ export default function Home(): JSX.Element {
   const [personalRecommendations, setPersonalRecommendations] = useState<RecommendationItem[]>([])
   const [interestRecommendations, setInterestRecommendations] = useState<RecommendationItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [recommendationsError, setRecommendationsError] = useState(false)
   const [toast, setToast] = useState<string>('')
 
   const loadRecommendations = async (nextPreferences: UserPreferences, nextHiddenCourseIds: string[]) => {
     setIsLoading(true)
-    const params = new URLSearchParams({
-      goal: nextPreferences.goal,
-      level: nextPreferences.level,
-      interests: nextPreferences.interests.join(','),
-      hidden: nextHiddenCourseIds.join(',')
-    })
+    setRecommendationsError(false)
 
-    const response = await fetch(`/api/recommendations?${params.toString()}`)
-    const data = await response.json() as RecommendationsResponse
+    try {
+      const params = new URLSearchParams({
+        goal: nextPreferences.goal,
+        level: nextPreferences.level,
+        interests: nextPreferences.interests.join(','),
+        hidden: nextHiddenCourseIds.join(',')
+      })
 
-    setPersonalRecommendations(data.sections.find((section) => section.title === 'Для вас')?.items ?? [])
-    setInterestRecommendations(data.sections.find((section) => section.title === 'На основе ваших интересов')?.items ?? [])
-    setIsLoading(false)
+      const response = await fetch(`/api/recommendations?${params.toString()}`)
+
+      if (!response.ok) {
+        throw new Error('Recommendations request failed')
+      }
+
+      const data = await response.json() as RecommendationsResponse
+
+      setPersonalRecommendations(data.sections.find((section) => section.title === 'Для вас')?.items ?? [])
+      setInterestRecommendations(data.sections.find((section) => section.title === 'На основе ваших интересов')?.items ?? [])
+    } catch {
+      setRecommendationsError(true)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -186,6 +200,19 @@ export default function Home(): JSX.Element {
         >
           {isLoading ? (
             <SkeletonCard count={4} />
+          ) : recommendationsError ? (
+            <ErrorState
+              description="Не получилось получить персональную ленту."
+              action={(
+                <button
+                  type="button"
+                  className="button button--secondary"
+                  onClick={() => loadRecommendations(preferences, hiddenCourseIds)}
+                >
+                  Повторить
+                </button>
+              )}
+            />
           ) : personalRecommendations.length > 0 ? (
             <div className="grid-cards">
               {personalRecommendations.map((item) => (
@@ -216,6 +243,19 @@ export default function Home(): JSX.Element {
         >
           {isLoading ? (
             <SkeletonCard count={4} />
+          ) : recommendationsError ? (
+            <ErrorState
+              description="Не получилось получить курсы по интересам."
+              action={(
+                <button
+                  type="button"
+                  className="button button--secondary"
+                  onClick={() => loadRecommendations(preferences, hiddenCourseIds)}
+                >
+                  Повторить
+                </button>
+              )}
+            />
           ) : (
             <div className="grid-cards">
               {interestRecommendations.map((item) => (

@@ -1,5 +1,7 @@
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
+import EmptyState from '../components/EmptyState'
+import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
@@ -100,7 +102,9 @@ export default function Catalog(): JSX.Element {
         <section className="page-container section section--compact">
           <div className="search-panel">
             <form onSubmit={handleSearch} className="search-form">
+              <label className="sr-only" htmlFor="catalog-search">Поиск курсов</label>
               <input
+                id="catalog-search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 type="text"
@@ -115,11 +119,13 @@ export default function Catalog(): JSX.Element {
             </form>
           </div>
 
-          <div className="filter-buttons">
+          <div className="filter-buttons" role="group" aria-label="Фильтр по категории">
             {catalogCategories.map((category) => (
               <button
+                type="button"
                 key={category}
                 onClick={() => updateFilters({ category })}
+                aria-pressed={activeCategory === category}
                 className={`filter-button ${
                   activeCategory === category ? 'filter-button--active' : 'filter-button--inactive'
                 }`}
@@ -129,11 +135,13 @@ export default function Catalog(): JSX.Element {
             ))}
           </div>
 
-          <div className="filter-buttons mt-4">
+          <div className="filter-buttons mt-4" role="group" aria-label="Фильтр по уровню">
             {catalogLevels.map((levelItem) => (
               <button
+                type="button"
                 key={levelItem}
                 onClick={() => updateFilters({ level: levelItem })}
+                aria-pressed={activeLevel === levelItem}
                 className={`filter-button ${
                   activeLevel === levelItem ? 'filter-button--active' : 'filter-button--inactive'
                 }`}
@@ -145,11 +153,19 @@ export default function Catalog(): JSX.Element {
         </section>
 
         <section className="page-container section">
-          <div className="grid-cards">
-            {filteredCourses.map((course) => (
-              <CourseCard key={course.id} href={`/course/${course.id}`} {...course} />
-            ))}
-          </div>
+          {filteredCourses.length > 0 ? (
+            <div className="grid-cards">
+              {filteredCourses.map((course) => (
+                <CourseCard key={course.id} href={`/course/${course.id}`} {...course} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="Курсы не найдены"
+              description="Попробуйте изменить запрос или сбросить фильтры."
+              action={<Link href="/catalog" className="button button--secondary">Сбросить фильтры</Link>}
+            />
+          )}
         </section>
       </main>
     </>

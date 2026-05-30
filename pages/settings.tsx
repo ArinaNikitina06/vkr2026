@@ -16,6 +16,7 @@ import type { CourseLevel, UserPreferences } from '../lib/types'
 export default function Settings(): JSX.Element {
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [toast, setToast] = useState('')
+  const [error, setError] = useState('')
   const isOnboarding = !preferences.onboarded
 
   useEffect(() => {
@@ -46,13 +47,24 @@ export default function Settings(): JSX.Element {
       onboarded: true
     }
 
-    await fetch('/api/user/preferences', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(nextPreferences)
-    })
+    setError('')
+
+    try {
+      const response = await fetch('/api/user/preferences', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nextPreferences)
+      })
+
+      if (!response.ok) {
+        throw new Error('Preferences request failed')
+      }
+    } catch {
+      setError('Не удалось сохранить настройки. Попробуйте ещё раз.')
+      return
+    }
 
     setPreferences(nextPreferences)
     window.localStorage.setItem(preferencesStorageKey, JSON.stringify(nextPreferences))
@@ -83,10 +95,16 @@ export default function Settings(): JSX.Element {
             </div>
           )}
 
+          {error && (
+            <div className="mb-6">
+              <Toast tone="error">{error}</Toast>
+            </div>
+          )}
+
           <section className="settings-card">
             <div className="settings-section">
               <h2 className="settings-header">Цель обучения</h2>
-              <div className="form-tags">
+              <div className="form-tags" role="group" aria-label="Цель обучения">
                 {preferenceGoals.map((goal) => (
                   <Chip
                     key={goal}
@@ -102,7 +120,7 @@ export default function Settings(): JSX.Element {
             <div className="settings-section">
               <h2 className="settings-header">Интересы</h2>
               <p className="section-subtitle mb-4">По этим темам формируются блоки “Для вас” и “На основе интересов”.</p>
-              <div className="form-tags">
+              <div className="form-tags" role="group" aria-label="Интересы">
                 {preferenceInterests.map((interest) => (
                   <Chip
                     key={interest}
@@ -117,7 +135,7 @@ export default function Settings(): JSX.Element {
 
             <div className="settings-section">
               <h2 className="settings-header">Уровень подготовки</h2>
-              <div className="form-tags">
+              <div className="form-tags" role="group" aria-label="Уровень подготовки">
                 {preferenceLevels.map((level) => (
                   <Chip
                     key={level}

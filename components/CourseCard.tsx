@@ -65,13 +65,19 @@ export default function CourseCard({
           type="button"
           className={`card__action ${liked ? 'card__action--active' : ''}`}
           aria-pressed={liked}
+          aria-label={`${liked ? 'Убрать отметку нравится' : 'Отметить как понравившийся'}: ${title}`}
           onClick={handleLike}
         >
           Нравится
         </button>
       )}
       {onHide && (
-        <button type="button" className="card__action" onClick={() => onHide(id)}>
+        <button
+          type="button"
+          className="card__action"
+          aria-label={`Скрыть курс ${title} из рекомендаций`}
+          onClick={() => onHide(id)}
+        >
           Скрыть
         </button>
       )}
@@ -146,7 +152,7 @@ export default function CourseCard({
           onClick={handleBookmark}
           className="card__favorite"
           aria-pressed={favorite}
-          aria-label={favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+          aria-label={`${favorite ? 'Убрать из избранного' : 'Добавить в избранное'}: ${title}`}
         >
           {favorite ? '❤️' : '🤍'}
         </button>
