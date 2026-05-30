@@ -1,15 +1,21 @@
 import Header from '../../components/Header'
+import CourseCard from '../../components/CourseCard'
+import RecommendationSection from '../../components/RecommendationSection'
+import Toast from '../../components/ui/Toast'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { getCourseById } from '../../lib/data/courses'
+import { courses, getCourseById } from '../../lib/data/courses'
+import { getSimilarCourses } from '../../lib/recommendations/rank'
 
 export default function CoursePage(): JSX.Element {
   const router = useRouter()
   const [favorite, setFavorite] = useState(false)
+  const [enrolled, setEnrolled] = useState(false)
   const id = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id
   const course = getCourseById(id)
   const includes = course.includes ?? []
   const curriculum = course.curriculum ?? []
+  const similarCourses = getSimilarCourses(course, courses)
 
   return (
     <>
@@ -44,8 +50,12 @@ export default function CoursePage(): JSX.Element {
                 <div className="hero-panel">
                   <div className="border-b border-gray-700 pb-6">
                     <img src={course.previewImage ?? course.image} alt={course.title} className="w-full h-40 object-cover rounded mb-4 course-panel-image" />
-                    <button className="button button--primary button--full">
-                      Записаться
+                    <button
+                      className="button button--primary button--full"
+                      type="button"
+                      onClick={() => setEnrolled(true)}
+                    >
+                      {enrolled ? 'Вы записаны' : 'Записаться'}
                     </button>
                   </div>
                   <div className="text-white space-y-3 text-sm">
@@ -122,13 +132,39 @@ export default function CoursePage(): JSX.Element {
                   </div>
                 </div>
 
-                <button className="button button--primary button--full mt-6">
-                  Записаться на курс
+                <button
+                  className="button button--primary button--full mt-6"
+                  type="button"
+                  onClick={() => setEnrolled(true)}
+                >
+                  {enrolled ? 'Курс добавлен' : 'Записаться на курс'}
                 </button>
               </div>
             </aside>
           </div>
         </section>
+
+        {enrolled && (
+          <section className="page-container section--compact">
+            <Toast tone="success">Запись на курс сохранена в прототипе</Toast>
+          </section>
+        )}
+
+        <RecommendationSection
+          title="Похожие курсы"
+          description="Подборка учитывает направление, уровень и общие темы курса."
+        >
+          <div className="grid-cards">
+            {similarCourses.map((item) => (
+              <CourseCard
+                key={item.course.id}
+                href={`/course/${item.course.id}`}
+                reasons={item.reasons}
+                {...item.course}
+              />
+            ))}
+          </div>
+        </RecommendationSection>
       </main>
     </>
   )

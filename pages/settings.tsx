@@ -1,170 +1,149 @@
 import Header from '../components/Header'
-import { useState, type ChangeEvent } from 'react'
-
-type SettingsSection = 'profile' | 'notifications' | 'billing' | 'security'
-
-type SettingsFormData = {
-  avatar: string
-  username: string
-  bio: string
-  goalCareer: string
-  interests: string
-}
+import Button from '../components/ui/Button'
+import Checkbox from '../components/ui/Checkbox'
+import Chip from '../components/ui/Chip'
+import Toast from '../components/ui/Toast'
+import { useEffect, useState } from 'react'
+import {
+  defaultPreferences,
+  preferenceGoals,
+  preferenceInterests,
+  preferenceLevels,
+  preferencesStorageKey
+} from '../lib/data/preferences'
+import type { CourseLevel, UserPreferences } from '../lib/types'
 
 export default function Settings(): JSX.Element {
-  const [activeSection, setActiveSection] = useState<SettingsSection>('profile')
-  const [formData, setFormData] = useState<SettingsFormData>({
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100',
-    username: 'arina_designer',
-    bio: 'Продуктовый дизайлер из Сан-Франциско. Научаю React и Next.js.',
-    goalCareer: 'Смена карьеры',
-    interests: 'Дизайн, Разработка, UX'
-  })
+  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
+  const [toast, setToast] = useState('')
+  const isOnboarding = !preferences.onboarded
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = event.target
+  useEffect(() => {
+    const savedPreferences = window.localStorage.getItem(preferencesStorageKey)
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value
-    }))
+    if (savedPreferences) {
+      setPreferences(JSON.parse(savedPreferences))
+    }
+  }, [])
+
+  const toggleInterest = (interest: string) => {
+    setPreferences((current) => {
+      const exists = current.interests.includes(interest)
+      const interests = exists
+        ? current.interests.filter((item) => item !== interest)
+        : [...current.interests, interest]
+
+      return {
+        ...current,
+        interests
+      }
+    })
+  }
+
+  const savePreferences = () => {
+    const nextPreferences = {
+      ...preferences,
+      onboarded: true
+    }
+
+    setPreferences(nextPreferences)
+    window.localStorage.setItem(preferencesStorageKey, JSON.stringify(nextPreferences))
+    setToast(isOnboarding ? 'Настройки сохранены, рекомендации обновлены' : 'Изменения сохранены')
   }
 
   return (
     <>
       <Header />
       <main className="page-layout">
-        <div className="page-container">
-          <h1 className="section-title mb-8">Настройки</h1>
-
-          <div className="settings-grid">
-            <aside className="sidebar">
-              <nav className="sidebar-nav">
-                {([
-                  { id: 'profile', label: 'Профиль' },
-                  { id: 'notifications', label: 'Уведомления' },
-                  { id: 'billing', label: 'Оплата' },
-                  { id: 'security', label: 'Безопасность' }
-                ] as const).map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`sidebar-item ${
-                      activeSection === item.id ? 'sidebar-item--active' : 'sidebar-item--inactive'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </aside>
-
-            <div className="lg:col-span-3">
-              {activeSection === 'profile' && (
-                <section className="settings-card">
-                  <h2 className="section-title text-2xl mb-8">Профиль</h2>
-
-                  <div className="settings-section">
-                    <h3 className="settings-header">Профиль</h3>
-
-                    <div className="settings-row">
-                      <img src={formData.avatar} alt="Avatar" className="profile-avatar" />
-                      <button className="profile-button" type="button">
-                        Изменить аватар
-                      </button>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">Имя пользователя</label>
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                        className="settings-input"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">О себе</label>
-                      <textarea
-                        name="bio"
-                        value={formData.bio}
-                        onChange={handleInputChange}
-                        rows={4}
-                        className="settings-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="settings-section">
-                    <h3 className="settings-header">Цели обучения</h3>
-                    <p className="section-subtitle mb-4">Настройте свои рекомендации.</p>
-
-                    <div className="form-group">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">Основная цель</label>
-                      <select
-                        value={formData.goalCareer}
-                        onChange={(e) => setFormData({ ...formData, goalCareer: e.target.value })}
-                        className="settings-input"
-                      >
-                        <option>Смена карьеры</option>
-                        <option>Улучшение навыков</option>
-                        <option>Хобби</option>
-                        <option>Сертификация</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">Интересы</label>
-                      <div className="form-tags">
-                        {['Дизайн', 'Разработка', 'UX', 'Добавить'].map((tag) => (
-                          <span key={tag} className="profile-tag">
-                            {tag} {tag !== 'Добавить' && '×'}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="settings-summary">
-                    <div>
-                      <h3 className="text-md font-semibold text-gray-900">Персонализированные рекомендации</h3>
-                      <p className="text-gray-600 text-sm">Получайте предложения курсов на основе вашей активности.</p>
-                    </div>
-                    <div className="toggle">
-                      <div className="toggle-handle"></div>
-                    </div>
-                  </div>
-
-                  <button className="settings-button mt-8" type="button">
-                    Сохранить изменения
-                  </button>
-                </section>
-              )}
-
-              {activeSection === 'notifications' && (
-                <section className="settings-card">
-                  <h2 className="section-title text-2xl mb-8">Уведомления</h2>
-                  <p className="section-subtitle">Пока здесь нет настроек уведомлений.</p>
-                </section>
-              )}
-
-              {activeSection === 'billing' && (
-                <section className="settings-card">
-                  <h2 className="section-title text-2xl mb-8">Оплата</h2>
-                  <p className="section-subtitle">Пока здесь нет информации об оплате.</p>
-                </section>
-              )}
-
-              {activeSection === 'security' && (
-                <section className="settings-card">
-                  <h2 className="section-title text-2xl mb-8">Безопасность</h2>
-                  <p className="section-subtitle">Пока здесь нет параметров безопасности.</p>
-                </section>
-              )}
+        <div className="page-container section">
+          <div className="section-heading">
+            <div>
+              <h1 className="section-title section-title--lg">
+                {isOnboarding ? 'Настройка рекомендаций' : 'Настройки персонализации'}
+              </h1>
+              <p className="section-subtitle mt-2">
+                {isOnboarding
+                  ? 'Выберите цель, интересы и уровень, чтобы получить стартовую подборку курсов.'
+                  : 'Здесь можно изменить цель и темы, которые влияют на персональную ленту.'}
+              </p>
             </div>
           </div>
+
+          {toast && (
+            <div className="mb-6">
+              <Toast tone="success">{toast}</Toast>
+            </div>
+          )}
+
+          <section className="settings-card">
+            <div className="settings-section">
+              <h2 className="settings-header">Цель обучения</h2>
+              <div className="form-tags">
+                {preferenceGoals.map((goal) => (
+                  <Chip
+                    key={goal}
+                    active={preferences.goal === goal}
+                    onClick={() => setPreferences((current) => ({ ...current, goal }))}
+                  >
+                    {goal}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="settings-section">
+              <h2 className="settings-header">Интересы</h2>
+              <p className="section-subtitle mb-4">По этим темам формируются блоки “Для вас” и “На основе интересов”.</p>
+              <div className="form-tags">
+                {preferenceInterests.map((interest) => (
+                  <Chip
+                    key={interest}
+                    active={preferences.interests.includes(interest)}
+                    onClick={() => toggleInterest(interest)}
+                  >
+                    {interest}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="settings-section">
+              <h2 className="settings-header">Уровень подготовки</h2>
+              <div className="form-tags">
+                {preferenceLevels.map((level) => (
+                  <Chip
+                    key={level}
+                    active={preferences.level === level}
+                    onClick={() => setPreferences((current) => ({ ...current, level: level as CourseLevel }))}
+                  >
+                    {level}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="settings-section">
+              <h2 className="settings-header">Как используются данные</h2>
+              <p className="section-subtitle">
+                Прототип учитывает выбранную цель, интересы, уровень и действия с карточками: лайк, скрытие и добавление в избранное. Эти данные нужны только для настройки учебной ленты.
+              </p>
+            </div>
+
+            <div className="settings-summary">
+              <Checkbox
+                checked={preferences.consent}
+                onChange={(event) => setPreferences((current) => ({ ...current, consent: event.target.checked }))}
+                label="Я согласна на обработку данных для персональных рекомендаций"
+                helperText="Согласие требуется для сценария холодного старта и соответствует FR-8."
+              />
+            </div>
+
+            <div className="mt-8">
+              <Button onClick={savePreferences} disabled={!preferences.consent || preferences.interests.length === 0}>
+                {isOnboarding ? 'Начать обучение' : 'Сохранить изменения'}
+              </Button>
+            </div>
+          </section>
         </div>
       </main>
     </>

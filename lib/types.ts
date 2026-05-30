@@ -32,3 +32,17 @@ export type Course = {
 export type LearningCourse = Course & {
   progress?: number
 }
+
+export type UserPreferences = {
+  goal: string
+  interests: string[]
+  level: CourseLevel
+  consent: boolean
+  onboarded: boolean
+}
+
+export type RecommendationItem = {
+  course: Course
+  score: number
+  reasons: string[]
+}
