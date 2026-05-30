@@ -298,6 +298,22 @@ body {
   @apply button button--icon;
 }
 
+.navbar__auth {
+  @apply flex items-center gap-3;
+}
+
+.navbar__user {
+  @apply hidden xl:inline max-w-32 truncate text-sm font-medium text-gray-700;
+}
+
+.navbar__auth-button {
+  @apply rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.navbar__auth-button--primary {
+  @apply border-gray-900 bg-gray-900 text-white hover:bg-gray-700;
+}
+
 .search-form {
   @apply flex-1 relative w-full;
 }

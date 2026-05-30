@@ -1,10 +1,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import { useState, type FormEvent } from 'react'
 
 export default function Header(): JSX.Element {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [searchTerm, setSearchTerm] = useState('')
+  const isAuthenticated = status === 'authenticated'
+  const userInitial = session?.user?.name?.[0] ?? session?.user?.email?.[0] ?? 'А'
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -62,9 +66,29 @@ export default function Header(): JSX.Element {
               </svg>
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true"></span>
             </button>
-            <Link href="/settings" className="navbar__profile-button" aria-label="Открыть настройки профиля">
-              А
-            </Link>
+            {isAuthenticated ? (
+              <div className="navbar__auth">
+                <Link href="/settings" className="navbar__profile-button" aria-label="Открыть настройки профиля">
+                  {userInitial.toUpperCase()}
+                </Link>
+                <span className="navbar__user">{session.user?.name ?? session.user?.email}</span>
+                <button
+                  type="button"
+                  className="navbar__auth-button"
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                >
+                  Выйти
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="navbar__auth-button navbar__auth-button--primary"
+                onClick={() => signIn(undefined, { callbackUrl: '/' })}
+              >
+                Войти
+              </button>
+            )}
           </div>
         </div>
       </div>

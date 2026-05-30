@@ -3,13 +3,15 @@ import { prisma } from './prisma'
 
 export const demoUserEmail = 'demo@vkr.local'
 
-export async function getDemoUser() {
+export async function getOrCreateUser(email = demoUserEmail, name = 'Арина') {
   const user = await prisma.user.upsert({
-    where: { email: demoUserEmail },
-    update: {},
+    where: { email },
+    update: {
+      name
+    },
     create: {
-      email: demoUserEmail,
-      name: 'Арина',
+      email,
+      name,
       preferences: {
         create: {
           goal: defaultPreferences.goal,
@@ -23,4 +25,8 @@ export async function getDemoUser() {
   })
 
   return user
+}
+
+export async function getDemoUser() {
+  return getOrCreateUser()
 }
