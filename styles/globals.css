@@ -80,6 +80,10 @@ body {
   @apply relative w-full h-40 bg-gray-200 overflow-hidden;
 }
 
+.card__image {
+  @apply h-full w-full object-cover;
+}
+
 .card__favorite {
   @apply absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-red-600 transition;
 }
@@ -356,6 +360,10 @@ body {
 
 .hero-description {
   @apply text-gray-200 text-lg mt-6;
+}
+
+.hero-summary .section-title {
+  @apply text-white;
 }
 
 .course-category {
