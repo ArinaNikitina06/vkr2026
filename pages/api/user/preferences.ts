@@ -1,26 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { defaultPreferences } from '../../../lib/data/preferences'
+import { getStoredPreferences, saveStoredPreferences } from '../../../lib/server/preferencesRepository'
 import type { UserPreferences } from '../../../lib/types'
 
-let savedPreferences: UserPreferences = defaultPreferences
-
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<UserPreferences | { message: string }>
 ) {
   if (request.method === 'GET') {
-    response.status(200).json(savedPreferences)
+    response.status(200).json(await getStoredPreferences())
     return
   }
 
   if (request.method === 'PUT') {
-    savedPreferences = {
-      ...defaultPreferences,
-      ...request.body,
-      onboarded: true
-    }
-
-    response.status(200).json(savedPreferences)
+    response.status(200).json(await saveStoredPreferences(request.body))
     return
   }
 

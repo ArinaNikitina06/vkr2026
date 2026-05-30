@@ -7,19 +7,26 @@
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "db:init": "sqlite3 prisma/dev.db \".read prisma/migrations/20260530194200_init/migration.sql\"",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "autoprefixer": "^10.4.18",
     "next": "latest",
+    "next-auth": "^4.24.14",
+    "postcss": "^8.4.35",
     "react": "latest",
     "react-dom": "latest",
-    "tailwindcss": "^3.4.5",
-    "postcss": "^8.4.35",
-    "autoprefixer": "^10.4.18"
+    "tailwindcss": "^3.4.5"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0",
     "@types/react": "^18.0.0",
-    "@types/node": "^18.0.0"
+    "prisma": "^7.8.0",
+    "typescript": "^5.0.0"
   }
 }

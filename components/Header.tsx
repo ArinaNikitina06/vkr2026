@@ -9,7 +9,7 @@ export default function Header(): JSX.Element {
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const query = searchTerm.trim()
-    const path = query ? `/catalog?search=${encodeURIComponent(query)}` : '/catalog'
+    const path = query ? `/catalog?q=${encodeURIComponent(query)}` : '/catalog'
     router.push(path)
   }
 

@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-type InteractionType = 'view' | 'like' | 'hide' | 'bookmark' | 'search'
+import { saveInteraction, type InteractionType } from '../../lib/server/interactionsRepository'
 
 type InteractionRequest = {
   courseId?: string
@@ -14,7 +13,7 @@ type InteractionResponse = {
   courseId?: string
 }
 
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<InteractionResponse | { message: string }>
 ) {
@@ -30,6 +29,8 @@ export default function handler(
     response.status(400).json({ message: 'Interaction type is required' })
     return
   }
+
+  await saveInteraction(type, courseId, request.body.metadata)
 
   response.status(200).json({
     ok: true,

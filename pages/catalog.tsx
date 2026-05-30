@@ -1,25 +1,32 @@
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import EmptyState from '../components/EmptyState'
+import Chip from '../components/ui/Chip'
 import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
-import type { CourseLevel } from '../lib/types'
-
-type CatalogLevel = 'Все' | CourseLevel
-
-const catalogLevels: CatalogLevel[] = ['Все', 'Начальный', 'Средний', 'Продвинутый']
+import {
+  catalogLevels,
+  defaultCatalogSort,
+  filterCourses,
+  sortOptions,
+  type CatalogLevel,
+  type CatalogSort
+} from '../lib/catalogFilters'
 
 export default function Catalog(): JSX.Element {
   const router = useRouter()
-  const { category, level, search, tag } = router.query
+  const { category, level, q, search, sort, tag } = router.query
   const [activeCategory, setActiveCategory] = useState<CatalogCategory>('Все')
   const [activeLevel, setActiveLevel] = useState<CatalogLevel>('Все')
+  const [activeSort, setActiveSort] = useState<CatalogSort>(defaultCatalogSort)
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   useEffect(() => {
-    if (typeof search === 'string') {
+    if (typeof q === 'string') {
+      setSearchTerm(q)
+    } else if (typeof search === 'string') {
       setSearchTerm(search)
     }
 
@@ -41,24 +48,33 @@ export default function Catalog(): JSX.Element {
 
       setActiveLevel(normalizedLevel ?? 'Все')
     }
-  }, [category, level, search, tag])
+
+    if (typeof sort === 'string') {
+      const normalizedSort = sortOptions.find((item) => item.value === sort)
+
+      setActiveSort(normalizedSort?.value ?? defaultCatalogSort)
+    }
+  }, [category, level, q, search, sort, tag])
 
   const updateFilters = (nextFilters: {
     category?: CatalogCategory
     level?: CatalogLevel
+    sort?: CatalogSort
     search?: string
   }) => {
     const nextCategory = nextFilters.category ?? activeCategory
     const nextLevel = nextFilters.level ?? activeLevel
+    const nextSort = nextFilters.sort ?? activeSort
     const nextSearch = nextFilters.search ?? searchTerm
     const params = new URLSearchParams()
 
     setActiveCategory(nextCategory)
     setActiveLevel(nextLevel)
+    setActiveSort(nextSort)
     setSearchTerm(nextSearch)
 
     if (nextSearch.trim()) {
-      params.set('search', nextSearch.trim())
+      params.set('q', nextSearch.trim())
     }
 
     if (nextCategory !== 'Все') {
@@ -67,6 +83,10 @@ export default function Catalog(): JSX.Element {
 
     if (nextLevel !== 'Все') {
       params.set('level', nextLevel)
+    }
+
+    if (nextSort !== defaultCatalogSort) {
+      params.set('sort', nextSort)
     }
 
     const query = params.toString()
@@ -78,16 +98,12 @@ export default function Catalog(): JSX.Element {
     updateFilters({ search: searchTerm })
   }
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesCategory = activeCategory === 'Все' ? true : course.category === activeCategory.toUpperCase()
-    const matchesLevel = activeLevel === 'Все' ? true : course.level === activeLevel
-    const query = searchTerm.trim().toLowerCase()
-    const matchesSearch =
-      !query ||
-      [course.title, course.description, course.category, ...(course.tags || [])]
-        .some((value) => value.toLowerCase().includes(query))
-
-    return matchesCategory && matchesLevel && matchesSearch
+  const filteredCourses = filterCourses({
+    courses,
+    category: activeCategory,
+    level: activeLevel,
+    search: searchTerm,
+    sort: activeSort
   })
 
   return (
@@ -121,34 +137,42 @@ export default function Catalog(): JSX.Element {
 
           <div className="filter-buttons" role="group" aria-label="Фильтр по категории">
             {catalogCategories.map((category) => (
-              <button
-                type="button"
+              <Chip
                 key={category}
                 onClick={() => updateFilters({ category })}
-                aria-pressed={activeCategory === category}
-                className={`filter-button ${
-                  activeCategory === category ? 'filter-button--active' : 'filter-button--inactive'
-                }`}
+                active={activeCategory === category}
               >
                 {category}
-              </button>
+              </Chip>
             ))}
           </div>
 
           <div className="filter-buttons mt-4" role="group" aria-label="Фильтр по уровню">
             {catalogLevels.map((levelItem) => (
-              <button
-                type="button"
+              <Chip
                 key={levelItem}
                 onClick={() => updateFilters({ level: levelItem })}
-                aria-pressed={activeLevel === levelItem}
-                className={`filter-button ${
-                  activeLevel === levelItem ? 'filter-button--active' : 'filter-button--inactive'
-                }`}
+                active={activeLevel === levelItem}
               >
                 {levelItem}
-              </button>
+              </Chip>
             ))}
+          </div>
+
+          <div className="catalog-sort">
+            <label htmlFor="catalog-sort" className="catalog-sort__label">Сортировка</label>
+            <select
+              id="catalog-sort"
+              value={activeSort}
+              onChange={(event) => updateFilters({ sort: event.target.value as CatalogSort })}
+              className="catalog-sort__select"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </section>
 

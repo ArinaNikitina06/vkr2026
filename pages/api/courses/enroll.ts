@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getCourseById } from '../../../lib/data/courses'
+import { getCoursesFromDatabase } from '../../../lib/server/courseRepository'
+import { enrollDemoUser } from '../../../lib/server/interactionsRepository'
 
 type EnrollResponse = {
   ok: boolean
@@ -7,7 +8,7 @@ type EnrollResponse = {
   status: 'enrolled'
 }
 
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<EnrollResponse | { message: string }>
 ) {
@@ -18,7 +19,9 @@ export default function handler(
   }
 
   const courseId = String(request.body?.courseId ?? '')
-  const course = getCourseById(courseId)
+  const courses = await getCoursesFromDatabase()
+  const course = courses.find((item) => item.id === courseId) ?? courses[0]
+  await enrollDemoUser(course.id)
 
   response.status(200).json({
     ok: true,

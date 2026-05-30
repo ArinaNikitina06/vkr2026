@@ -318,16 +318,16 @@ body {
   @apply flex gap-3 flex-wrap;
 }
 
-.filter-button {
-  @apply px-4 py-2 rounded-full font-medium transition-colors border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+.catalog-sort {
+  @apply mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between;
 }
 
-.filter-button--active {
-  @apply bg-gray-800 text-white border-transparent;
+.catalog-sort__label {
+  @apply text-sm font-semibold text-gray-700;
 }
 
-.filter-button--inactive {
-  @apply bg-white text-gray-700 hover:border-gray-400;
+.catalog-sort__select {
+  @apply w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 sm:w-64;
 }
 
 .hero-banner {

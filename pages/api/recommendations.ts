@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { courses, getCourseById } from '../../lib/data/courses'
 import { defaultPreferences } from '../../lib/data/preferences'
 import { getSimilarCourses, rankCourses } from '../../lib/recommendations/rank'
+import { getCoursesFromDatabase } from '../../lib/server/courseRepository'
 import type { CourseLevel, RecommendationItem, UserPreferences } from '../../lib/types'
 
 type RecommendationSectionResponse = {
@@ -42,7 +42,7 @@ function parsePreferences(request: NextApiRequest): UserPreferences {
   }
 }
 
-export default function handler(
+export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse<RecommendationsResponse | { message: string }>
 ) {
@@ -54,9 +54,10 @@ export default function handler(
 
   const context = getQueryValue(request.query.context) ?? 'home'
   const hiddenCourseIds = parseList(request.query.hidden)
+  const courses = await getCoursesFromDatabase()
 
   if (context === 'course') {
-    const course = getCourseById(getQueryValue(request.query.courseId))
+    const course = courses.find((item) => item.id === getQueryValue(request.query.courseId)) ?? courses[0]
 
     response.status(200).json({
       sections: [
