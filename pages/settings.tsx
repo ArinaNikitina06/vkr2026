@@ -40,11 +40,19 @@ export default function Settings(): JSX.Element {
     })
   }
 
-  const savePreferences = () => {
+  const savePreferences = async () => {
     const nextPreferences = {
       ...preferences,
       onboarded: true
     }
+
+    await fetch('/api/user/preferences', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(nextPreferences)
+    })
 
     setPreferences(nextPreferences)
     window.localStorage.setItem(preferencesStorageKey, JSON.stringify(nextPreferences))

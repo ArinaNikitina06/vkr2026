@@ -5,8 +5,8 @@ import RecommendationSection from '../components/RecommendationSection'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
-import { courses, ongoingCourses } from '../lib/data/courses'
+import { useEffect, useState } from 'react'
+import { ongoingCourses } from '../lib/data/courses'
 import {
   bookmarkedCoursesStorageKey,
   defaultPreferences,
@@ -14,8 +14,14 @@ import {
   likedCoursesStorageKey,
   preferencesStorageKey
 } from '../lib/data/preferences'
-import { rankCourses } from '../lib/recommendations/rank'
-import type { UserPreferences } from '../lib/types'
+import type { RecommendationItem, UserPreferences } from '../lib/types'
+
+type RecommendationsResponse = {
+  sections: {
+    title: string
+    items: RecommendationItem[]
+  }[]
+}
 
 function readStringList(key: string): string[] {
   if (typeof window === 'undefined') {
@@ -36,45 +42,68 @@ function saveStringList(key: string, value: string[]) {
 export default function Home(): JSX.Element {
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [hiddenCourseIds, setHiddenCourseIds] = useState<string[]>([])
+  const [personalRecommendations, setPersonalRecommendations] = useState<RecommendationItem[]>([])
+  const [interestRecommendations, setInterestRecommendations] = useState<RecommendationItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [toast, setToast] = useState<string>('')
 
+  const loadRecommendations = async (nextPreferences: UserPreferences, nextHiddenCourseIds: string[]) => {
+    setIsLoading(true)
+    const params = new URLSearchParams({
+      goal: nextPreferences.goal,
+      level: nextPreferences.level,
+      interests: nextPreferences.interests.join(','),
+      hidden: nextHiddenCourseIds.join(',')
+    })
+
+    const response = await fetch(`/api/recommendations?${params.toString()}`)
+    const data = await response.json() as RecommendationsResponse
+
+    setPersonalRecommendations(data.sections.find((section) => section.title === 'Для вас')?.items ?? [])
+    setInterestRecommendations(data.sections.find((section) => section.title === 'На основе ваших интересов')?.items ?? [])
+    setIsLoading(false)
+  }
+
   useEffect(() => {
     const savedPreferences = window.localStorage.getItem(preferencesStorageKey)
+    const nextPreferences = savedPreferences ? JSON.parse(savedPreferences) : defaultPreferences
+    const nextHiddenCourseIds = readStringList(hiddenCoursesStorageKey)
 
-    if (savedPreferences) {
-      setPreferences(JSON.parse(savedPreferences))
-    }
-
-    setHiddenCourseIds(readStringList(hiddenCoursesStorageKey))
-    setIsLoading(false)
+    setPreferences(nextPreferences)
+    setHiddenCourseIds(nextHiddenCourseIds)
+    loadRecommendations(nextPreferences, nextHiddenCourseIds)
   }, [])
 
-  const recommendations = useMemo(() => (
-    rankCourses(courses, preferences, hiddenCourseIds)
-  ), [hiddenCourseIds, preferences])
-
-  const personalRecommendations = recommendations.slice(0, 4)
-  const interestRecommendations = recommendations
-    .filter((item) => item.course.tags.some((tag) => preferences.interests.includes(tag)))
-    .slice(0, 4)
+  const sendInteraction = async (courseId: string, type: 'like' | 'hide' | 'bookmark') => {
+    await fetch('/api/interactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ courseId, type })
+    })
+  }
 
   const handleHide = (courseId: string) => {
     const nextHiddenIds = Array.from(new Set([...hiddenCourseIds, courseId]))
     setHiddenCourseIds(nextHiddenIds)
     saveStringList(hiddenCoursesStorageKey, nextHiddenIds)
+    sendInteraction(courseId, 'hide')
+    loadRecommendations(preferences, nextHiddenIds)
     setToast('Курс скрыт из рекомендаций')
   }
 
   const handleLike = (courseId: string) => {
     const nextLikedIds = Array.from(new Set([...readStringList(likedCoursesStorageKey), courseId]))
     saveStringList(likedCoursesStorageKey, nextLikedIds)
+    sendInteraction(courseId, 'like')
     setToast('Отметка учтена для будущих рекомендаций')
   }
 
   const handleBookmark = (courseId: string) => {
     const nextBookmarkedIds = Array.from(new Set([...readStringList(bookmarkedCoursesStorageKey), courseId]))
     saveStringList(bookmarkedCoursesStorageKey, nextBookmarkedIds)
+    sendInteraction(courseId, 'bookmark')
     setToast('Курс добавлен в избранное')
   }
 

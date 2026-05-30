@@ -3,9 +3,16 @@ import CourseCard from '../../components/CourseCard'
 import RecommendationSection from '../../components/RecommendationSection'
 import Toast from '../../components/ui/Toast'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-import { courses, getCourseById } from '../../lib/data/courses'
-import { getSimilarCourses } from '../../lib/recommendations/rank'
+import { useEffect, useState } from 'react'
+import { getCourseById } from '../../lib/data/courses'
+import type { RecommendationItem } from '../../lib/types'
+
+type RecommendationsResponse = {
+  sections: {
+    title: string
+    items: RecommendationItem[]
+  }[]
+}
 
 export default function CoursePage(): JSX.Element {
   const router = useRouter()
@@ -15,7 +22,39 @@ export default function CoursePage(): JSX.Element {
   const course = getCourseById(id)
   const includes = course.includes ?? []
   const curriculum = course.curriculum ?? []
-  const similarCourses = getSimilarCourses(course, courses)
+  const [similarCourses, setSimilarCourses] = useState<RecommendationItem[]>([])
+
+  useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(id)}`)
+      .then((response) => response.json())
+      .then((data: RecommendationsResponse) => {
+        setSimilarCourses(data.sections[0]?.items ?? [])
+      })
+
+    fetch('/api/interactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ courseId: id, type: 'view' })
+    })
+  }, [id])
+
+  const enrollCourse = async () => {
+    await fetch('/api/courses/enroll', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ courseId: course.id })
+    })
+
+    setEnrolled(true)
+  }
 
   return (
     <>
@@ -53,7 +92,7 @@ export default function CoursePage(): JSX.Element {
                     <button
                       className="button button--primary button--full"
                       type="button"
-                      onClick={() => setEnrolled(true)}
+                      onClick={enrollCourse}
                     >
                       {enrolled ? 'Вы записаны' : 'Записаться'}
                     </button>
@@ -135,7 +174,7 @@ export default function CoursePage(): JSX.Element {
                 <button
                   className="button button--primary button--full mt-6"
                   type="button"
-                  onClick={() => setEnrolled(true)}
+                  onClick={enrollCourse}
                 >
                   {enrolled ? 'Курс добавлен' : 'Записаться на курс'}
                 </button>
