@@ -1,10 +1,47 @@
 import type { Course, RecommendationItem, UserPreferences } from '../types'
 
+type RecommendationSignals = {
+  hiddenCourseIds?: string[]
+  likedCourseIds?: string[]
+  bookmarkedCourseIds?: string[]
+}
+
+function hasCommonTags(course: Course, sourceCourse: Course): boolean {
+  return course.tags.some((tag) => sourceCourse.tags.includes(tag))
+}
+
+function getSignalCourses(courses: Course[], courseIds: string[]): Course[] {
+  return courseIds
+    .map((courseId) => courses.find((course) => course.id === courseId))
+    .filter((course): course is Course => Boolean(course))
+}
+
+function checkGoalMatch(course: Course, goal: string): boolean {
+  if (goal === 'Смена карьеры') {
+    return ['РАЗРАБОТКА', 'ДИЗАЙН', 'ДАННЫЕ'].includes(course.category)
+  }
+
+  if (goal === 'Сертификация') {
+    return course.price !== 'Бесплатно'
+  }
+
+  if (goal === 'Улучшение навыков') {
+    return course.level === 'Средний' || course.level === 'Продвинутый'
+  }
+
+  return true
+}
+
 export function rankCourses(
   courses: Course[],
   preferences: UserPreferences,
-  hiddenCourseIds: string[] = []
+  signals: RecommendationSignals = {}
 ): RecommendationItem[] {
+  const hiddenCourseIds = signals.hiddenCourseIds ?? []
+  const likedCourses = getSignalCourses(courses, signals.likedCourseIds ?? [])
+  const bookmarkedCourses = getSignalCourses(courses, signals.bookmarkedCourseIds ?? [])
+  const signalCourses = [...likedCourses, ...bookmarkedCourses]
+
   return courses
     .filter((course) => !hiddenCourseIds.includes(course.id))
     .map((course) => {
@@ -13,22 +50,32 @@ export function rankCourses(
 
       if (preferences.interests.some((interest) => course.tags.includes(interest))) {
         score += 2
-        reasons.push('Соответствует выбранным интересам')
+        reasons.push('Соответствует вашим интересам')
+      }
+
+      if (checkGoalMatch(course, preferences.goal)) {
+        score += 1.2
+        reasons.push('Соответствует вашей цели')
       }
 
       if (course.level === preferences.level) {
         score += 1.5
-        reasons.push(`Подходит уровню «${preferences.level}»`)
+        reasons.push('Подходит вашему уровню')
       }
 
-      if (preferences.goal === 'Смена карьеры' && ['РАЗРАБОТКА', 'ДИЗАЙН', 'ДАННЫЕ'].includes(course.category)) {
+      if (likedCourses.some((likedCourse) => likedCourse.id === course.id)) {
         score += 1
-        reasons.push('Подходит для смены карьерного направления')
+        reasons.push('Вы отметили этот курс как полезный')
       }
 
-      if (preferences.goal === 'Сертификация' && course.price !== 'Бесплатно') {
-        score += 0.7
-        reasons.push('Подходит для структурного обучения')
+      if (bookmarkedCourses.some((bookmarkedCourse) => bookmarkedCourse.id === course.id)) {
+        score += 1
+        reasons.push('Курс сохранен в избранном')
+      }
+
+      if (signalCourses.some((signalCourse) => signalCourse.id !== course.id && hasCommonTags(course, signalCourse))) {
+        score += 1.3
+        reasons.push('Похож на сохраненные курсы')
       }
 
       if (course.students > 2000) {
@@ -49,7 +96,15 @@ export function rankCourses(
     .sort((left, right) => right.score - left.score)
 }
 
-export function getSimilarCourses(course: Course, courses: Course[]): RecommendationItem[] {
+export function getSimilarCourses(
+  course: Course,
+  courses: Course[],
+  signals: Pick<RecommendationSignals, 'likedCourseIds' | 'bookmarkedCourseIds'> = {}
+): RecommendationItem[] {
+  const likedCourses = getSignalCourses(courses, signals.likedCourseIds ?? [])
+  const bookmarkedCourses = getSignalCourses(courses, signals.bookmarkedCourseIds ?? [])
+  const signalCourses = [...likedCourses, ...bookmarkedCourses]
+
   return courses
     .filter((item) => item.id !== course.id)
     .map((item) => {
@@ -69,6 +124,11 @@ export function getSimilarCourses(course: Course, courses: Course[]): Recommenda
       if (item.tags.some((tag) => course.tags.includes(tag))) {
         score += 1
         reasons.push('Есть общие темы курса')
+      }
+
+      if (signalCourses.some((signalCourse) => signalCourse.id !== item.id && hasCommonTags(item, signalCourse))) {
+        score += 1.2
+        reasons.push('Похож на сохраненные курсы')
       }
 
       return {

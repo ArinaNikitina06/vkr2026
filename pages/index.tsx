@@ -58,7 +58,9 @@ export default function Home(): JSX.Element {
         goal: nextPreferences.goal,
         level: nextPreferences.level,
         interests: nextPreferences.interests.join(','),
-        hidden: nextHiddenCourseIds.join(',')
+        hidden: nextHiddenCourseIds.join(','),
+        liked: readStringList(likedCoursesStorageKey).join(','),
+        bookmarked: readStringList(bookmarkedCoursesStorageKey).join(',')
       })
 
       const response = await fetch(`/api/recommendations?${params.toString()}`)
@@ -111,6 +113,7 @@ export default function Home(): JSX.Element {
     const nextLikedIds = Array.from(new Set([...readStringList(likedCoursesStorageKey), courseId]))
     saveStringList(likedCoursesStorageKey, nextLikedIds)
     sendInteraction(courseId, 'like')
+    loadRecommendations(preferences, hiddenCourseIds)
     setToast('Отметка учтена для будущих рекомендаций')
   }
 
@@ -118,6 +121,7 @@ export default function Home(): JSX.Element {
     const nextBookmarkedIds = Array.from(new Set([...readStringList(bookmarkedCoursesStorageKey), courseId]))
     saveStringList(bookmarkedCoursesStorageKey, nextBookmarkedIds)
     sendInteraction(courseId, 'bookmark')
+    loadRecommendations(preferences, hiddenCourseIds)
     setToast('Курс добавлен в избранное')
   }
 

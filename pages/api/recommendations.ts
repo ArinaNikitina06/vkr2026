@@ -54,6 +54,8 @@ export default async function handler(
 
   const context = getQueryValue(request.query.context) ?? 'home'
   const hiddenCourseIds = parseList(request.query.hidden)
+  const likedCourseIds = parseList(request.query.liked)
+  const bookmarkedCourseIds = parseList(request.query.bookmarked)
   const courses = await getCoursesFromDatabase()
 
   if (context === 'course') {
@@ -63,7 +65,10 @@ export default async function handler(
       sections: [
         {
           title: 'Похожие курсы',
-          items: getSimilarCourses(course, courses)
+          items: getSimilarCourses(course, courses, {
+            likedCourseIds,
+            bookmarkedCourseIds
+          })
         }
       ]
     })
@@ -71,7 +76,11 @@ export default async function handler(
   }
 
   const preferences = parsePreferences(request)
-  const rankedCourses = rankCourses(courses, preferences, hiddenCourseIds)
+  const rankedCourses = rankCourses(courses, preferences, {
+    hiddenCourseIds,
+    likedCourseIds,
+    bookmarkedCourseIds
+  })
   const interestCourses = rankedCourses.filter((item) => (
     item.course.tags.some((tag) => preferences.interests.includes(tag))
   ))
