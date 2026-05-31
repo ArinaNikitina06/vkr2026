@@ -1,7 +1,11 @@
 import Header from '../../components/Header'
 import CourseCard from '../../components/CourseCard'
+import EmptyState from '../../components/EmptyState'
+import ErrorState from '../../components/ErrorState'
 import RecommendationSection from '../../components/RecommendationSection'
+import SkeletonCard from '../../components/SkeletonCard'
 import Toast from '../../components/ui/Toast'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { getCourseById } from '../../lib/data/courses'
@@ -19,6 +23,8 @@ export default function CoursePage(): JSX.Element {
   const [favorite, setFavorite] = useState(false)
   const [enrolled, setEnrolled] = useState(false)
   const [error, setError] = useState('')
+  const [similarCoursesError, setSimilarCoursesError] = useState(false)
+  const [isSimilarCoursesLoading, setIsSimilarCoursesLoading] = useState(true)
   const id = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id
   const course = getCourseById(id)
   const includes = course.includes ?? []
@@ -30,12 +36,22 @@ export default function CoursePage(): JSX.Element {
       return
     }
 
+    setIsSimilarCoursesLoading(true)
+    setSimilarCoursesError(false)
+
     fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(id)}`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Similar courses request failed')
+        }
+
+        return response.json()
+      })
       .then((data: RecommendationsResponse) => {
         setSimilarCourses(data.sections[0]?.items ?? [])
       })
-      .catch(() => setError('Не удалось загрузить похожие курсы.'))
+      .catch(() => setSimilarCoursesError(true))
+      .finally(() => setIsSimilarCoursesLoading(false))
 
     fetch('/api/interactions', {
       method: 'POST',
@@ -75,7 +91,9 @@ export default function CoursePage(): JSX.Element {
       <main className="page-layout--white">
         <section className="hero-banner">
           <div className="hero-overlay"></div>
-          <img src={course.image} alt={course.title} className="card__image card__media--hero" />
+          <div className="card__media card__media--hero">
+            <Image src={course.image} alt={course.title} fill priority sizes="100vw" className="card__image" />
+          </div>
 
           <div className="hero-content">
             <div className="page-container w-full">
@@ -101,7 +119,9 @@ export default function CoursePage(): JSX.Element {
 
                 <div className="hero-panel">
                   <div className="border-b border-gray-700 pb-6">
-                    <img src={course.previewImage ?? course.image} alt={course.title} className="w-full h-40 object-cover rounded mb-4 course-panel-image" />
+                    <div className="course-panel-image-wrapper">
+                      <Image src={course.previewImage ?? course.image} alt={course.title} fill sizes="24rem" className="card__image course-panel-image" />
+                    </div>
                     <button
                       className="button button--primary button--full"
                       type="button"
@@ -133,7 +153,9 @@ export default function CoursePage(): JSX.Element {
               <div className="course-section mb-12 pb-12">
                 <h2 className="section-title text-2xl mb-6">О преподавателе</h2>
                 <div className="flex items-center gap-4">
-                  <img src={course.instructorImage} alt={course.instructor} className="w-16 h-16 rounded-full" />
+                  {course.instructorImage && (
+                    <Image src={course.instructorImage} alt={course.instructor ?? 'Преподаватель курса'} width={64} height={64} className="rounded-full" />
+                  )}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{course.instructor}</h3>
                     <p className="text-gray-600">Продуктовый дизайнер из Сан-Франциско. Научу React и Next.js.</p>
@@ -216,16 +238,27 @@ export default function CoursePage(): JSX.Element {
           title="Похожие курсы"
           description="Подборка учитывает направление, уровень и общие темы курса."
         >
-          <div className="grid-cards">
-            {similarCourses.map((item) => (
-              <CourseCard
-                key={item.course.id}
-                href={`/course/${item.course.id}`}
-                reasons={item.reasons}
-                {...item.course}
-              />
-            ))}
-          </div>
+          {isSimilarCoursesLoading ? (
+            <SkeletonCard count={4} />
+          ) : similarCoursesError ? (
+            <ErrorState description="Не получилось загрузить похожие курсы." />
+          ) : similarCourses.length > 0 ? (
+            <div className="grid-cards">
+              {similarCourses.map((item) => (
+                <CourseCard
+                  key={item.course.id}
+                  href={`/course/${item.course.id}`}
+                  reasons={item.reasons}
+                  {...item.course}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="Похожие курсы не найдены"
+              description="Можно вернуться в каталог и выбрать другое направление."
+            />
+          )}
         </RecommendationSection>
       </main>
     </>

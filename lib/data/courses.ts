@@ -8,9 +8,9 @@ export const courses: Course[] = [
     title: 'Основы UI дизайна',
     description: 'Освойте принципы дизайна интерфейсов, теорию цвета и типографику.',
     fullDescription: 'Этот комплексный курс охватывает все от вайфреймов до высокодетализированных прототипов. Научитесь создавать визуально привлекательные функциональные интерфейсы, которые нравятся пользователям.',
-    previewImage: 'https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1600&q=80',
+    previewImage: '/assets/hero.jpg',
     instructor: 'Анна Петрова',
-    instructorImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100',
+    instructorImage: '/assets/course.png',
     tags: ['Дизайн', 'Начальный'],
     duration: '4ч 20м',
     students: 1200,
@@ -33,7 +33,7 @@ export const courses: Course[] = [
   },
   {
     id: '2',
-    image: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'РАЗРАБОТКА',
     title: 'Fullstack Next.js 14',
     description: 'Создавайте масштабируемые приложения с новейшими возможностями Next.js.',
@@ -47,7 +47,7 @@ export const courses: Course[] = [
   },
   {
     id: '3',
-    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'БИЗНЕС',
     title: 'Продакт-менеджмент',
     description: 'Научитесь управлять продуктовыми командами и определять стратегию.',
@@ -61,7 +61,7 @@ export const courses: Course[] = [
   },
   {
     id: '4',
-    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'ДАННЫЕ',
     title: 'Data Science с Python',
     description: 'Анализируйте данные и создавайте визуализации с помощью Pandas.',
@@ -75,7 +75,7 @@ export const courses: Course[] = [
   },
   {
     id: '5',
-    image: 'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'РАЗРАБОТКА',
     title: 'JavaScript для начинающих',
     description: 'Изучите основы программирования на JavaScript с нуля.',
@@ -89,7 +89,7 @@ export const courses: Course[] = [
   },
   {
     id: '6',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'ДИЗАЙН',
     title: 'Брендинг и айдентика',
     description: 'Создавайте запоминающиеся бренды и визуальные системы.',
@@ -103,7 +103,7 @@ export const courses: Course[] = [
   },
   {
     id: '7',
-    image: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'МАРКЕТИНГ',
     title: 'Цифровой маркетинг',
     description: 'Освойте SEO, контент-маркетинг и социальные сети.',
@@ -117,7 +117,7 @@ export const courses: Course[] = [
   },
   {
     id: '8',
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&h=200&q=80',
+    image: '/assets/course.png',
     category: 'БИЗНЕС',
     title: 'Финансовая грамотность',
     description: 'Управляйте личными финансами и инвестициями эффективно.',

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import RecommendationReason from './RecommendationReason'
 
@@ -24,7 +25,7 @@ type CourseCardProps = {
 
 export default function CourseCard({
   id = '1',
-  image = 'https://via.placeholder.com/300x200?text=Course',
+  image = '/assets/course.png',
   category = 'Разработка',
   title = 'Курс',
   description = 'Описание курса',
@@ -142,10 +143,10 @@ export default function CourseCard({
       <div className="card__media">
         {href ? (
           <Link href={href} aria-label={`Открыть курс ${title}`}>
-            <img src={image} alt={title} className="card__image" />
+            <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" />
           </Link>
         ) : (
-          <img src={image} alt={title} className="card__image" />
+          <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" />
         )}
         <button
           type="button"

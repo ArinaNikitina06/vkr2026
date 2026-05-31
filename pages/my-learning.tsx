@@ -1,6 +1,7 @@
 import Header from '../components/Header'
 import CourseCard from '../components/CourseCard'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { myLearningCourses } from '../lib/data/courses'
 
@@ -50,7 +51,7 @@ export default function MyLearning(): JSX.Element {
               {tabData.inProgress.map((course) => (
                 <div key={course.id} className="course-card-row">
                   <div className="course-card-row__media">
-                    <img src={course.image} alt={course.title} className="card__image" />
+                    <Image src={course.image} alt={course.title} fill sizes="(min-width: 768px) 12rem, 100vw" className="card__image" />
                   </div>
                   <div className="course-card-row__body">
                     <div>

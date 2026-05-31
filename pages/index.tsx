@@ -6,6 +6,7 @@ import RecommendationSection from '../components/RecommendationSection'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { ongoingCourses } from '../lib/data/courses'
 import {
@@ -165,7 +166,7 @@ export default function Home(): JSX.Element {
                 {ongoingCourses.map((course) => (
                   <div key={course.id} className="card card--course w-full">
                     <div className="card__media card__media--compact">
-                      <img src={course.image} alt={course.title} className="card__image" />
+                      <Image src={course.image} alt={course.title} fill sizes="(min-width: 1024px) 50vw, 100vw" className="card__image" />
                     </div>
                     <div className="card__body">
                       <div className="card__header">

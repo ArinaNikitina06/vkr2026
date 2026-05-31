@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 2px;
+}
+
 :root {
   --color-primary: #0ea5ff;
 }
@@ -372,6 +377,10 @@ body {
 
 .course-panel-image {
   filter: blur(1.5px);
+}
+
+.course-panel-image-wrapper {
+  @apply relative mb-4 h-40 w-full overflow-hidden rounded;
 }
 
 .hero-description {
