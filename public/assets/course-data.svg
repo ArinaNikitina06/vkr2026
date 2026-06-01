@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Иллюстрация курса по данным</title>
+  <desc id="desc">Дашборд с графиками и аналитическими карточками.</desc>
+  <rect width="800" height="480" fill="#f8fafc"/>
+  <rect x="72" y="64" width="656" height="352" rx="30" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+  <rect x="112" y="112" width="168" height="92" rx="22" fill="#dbeafe"/>
+  <rect x="316" y="112" width="168" height="92" rx="22" fill="#dcfce7"/>
+  <rect x="520" y="112" width="168" height="92" rx="22" fill="#ffedd5"/>
+  <path d="M132 336c54-72 102-44 148-96 54-62 106-44 166 20 50 54 98 28 156-56" fill="none" stroke="#0f172a" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="132" cy="336" r="12" fill="#38bdf8"/>
+  <circle cx="280" cy="240" r="12" fill="#22c55e"/>
+  <circle cx="446" cy="260" r="12" fill="#f97316"/>
+  <circle cx="602" cy="204" r="12" fill="#0f172a"/>
+  <rect x="112" y="356" width="124" height="18" rx="9" fill="#cbd5e1"/>
+  <rect x="260" y="356" width="92" height="18" rx="9" fill="#cbd5e1"/>
+  <rect x="376" y="356" width="144" height="18" rx="9" fill="#cbd5e1"/>
+</svg>

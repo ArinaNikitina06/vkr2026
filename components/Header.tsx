@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useState, type FormEvent } from 'react'
 
 export default function Header(): JSX.Element {
@@ -9,12 +9,15 @@ export default function Header(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const isAuthenticated = status === 'authenticated'
   const userInitial = session?.user?.name?.[0] ?? session?.user?.email?.[0] ?? 'А'
+  const protectedHref = (href: string) => (
+    isAuthenticated ? href : `/signin?callbackUrl=${encodeURIComponent(href)}`
+  )
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const query = searchTerm.trim()
     const path = query ? `/catalog?q=${encodeURIComponent(query)}` : '/catalog'
-    router.push(path)
+    router.push(protectedHref(path))
   }
 
   return (
@@ -32,13 +35,13 @@ export default function Header(): JSX.Element {
             <Link href="/" className="navbar__link">
               Главная
             </Link>
-            <Link href="/catalog" className="navbar__link">
+            <Link href={protectedHref('/catalog')} className="navbar__link">
               Каталог
             </Link>
-            <Link href="/my-learning" className="navbar__link">
+            <Link href={protectedHref('/my-learning')} className="navbar__link">
               Мои курсы
             </Link>
-            <Link href="/settings" className="navbar__link">
+            <Link href={protectedHref('/settings')} className="navbar__link">
               Настройки
             </Link>
           </nav>
@@ -81,13 +84,9 @@ export default function Header(): JSX.Element {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                className="navbar__auth-button navbar__auth-button--primary"
-                onClick={() => signIn(undefined, { callbackUrl: '/' })}
-              >
+              <Link href="/signin" className="navbar__auth-button navbar__auth-button--primary">
                 Войти
-              </button>
+              </Link>
             )}
           </div>
         </div>

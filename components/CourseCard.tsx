@@ -20,12 +20,12 @@ type CourseCardProps = {
   href?: string
   onLike?: (id: string) => void
   onHide?: (id: string) => void
-  onBookmark?: (id: string) => void
+  disableMetaLinks?: boolean
 }
 
 export default function CourseCard({
   id = '1',
-  image = '/assets/course.png',
+  image = '/assets/course-design.svg',
   category = 'Разработка',
   title = 'Курс',
   description = 'Описание курса',
@@ -40,24 +40,27 @@ export default function CourseCard({
   href,
   onLike,
   onHide,
-  onBookmark
+  disableMetaLinks = false
 }: CourseCardProps): JSX.Element {
-  const [favorite, setFavorite] = useState(false)
   const [liked, setLiked] = useState(false)
+  const isSvgImage = image.endsWith('.svg')
   const visibleTags = tags.filter((tag) => (
     tag.toLowerCase() !== level?.toLowerCase() &&
     tag.toLowerCase() !== category.toLowerCase()
   ))
 
-  const handleBookmark = () => {
-    setFavorite((value) => !value)
-    onBookmark?.(id)
-  }
-
   const handleLike = () => {
     setLiked((value) => !value)
     onLike?.(id)
   }
+
+  const categoryElement = disableMetaLinks ? (
+    <span className="card__badge">{category}</span>
+  ) : (
+    <Link href={`/catalog?category=${encodeURIComponent(category)}`} className="card__badge card__badge--link">
+      {category}
+    </Link>
+  )
 
   const actions = (onLike || onHide) ? (
     <div className="card__actions">
@@ -96,9 +99,7 @@ export default function CourseCard({
   const content = (
     <div className="card__content">
       <div className="card__header">
-        <Link href={`/catalog?category=${encodeURIComponent(category)}`} className="card__badge card__badge--link">
-          {category}
-        </Link>
+        {categoryElement}
       </div>
 
       {courseTitle}
@@ -110,18 +111,26 @@ export default function CourseCard({
       {visibleTags.length > 0 && (
         <div className="form-tags mb-3">
           {visibleTags.map((tag) => (
-            <Link key={tag} href={`/catalog?tag=${encodeURIComponent(tag)}`} className="tag">
-              {tag}
-            </Link>
+            disableMetaLinks ? (
+              <span key={tag} className="tag">{tag}</span>
+            ) : (
+              <Link key={tag} href={`/catalog?tag=${encodeURIComponent(tag)}`} className="tag">
+                {tag}
+              </Link>
+            )
           ))}
         </div>
       )}
 
       <div className="card__attributes">
         {level && (
-          <Link href={`/catalog?level=${encodeURIComponent(level)}`}>
-            {level}
-          </Link>
+          disableMetaLinks ? (
+            <span>{level}</span>
+          ) : (
+            <Link href={`/catalog?level=${encodeURIComponent(level)}`}>
+              {level}
+            </Link>
+          )
         )}
         {rating && <span>Рейтинг {rating.toFixed(1)}</span>}
       </div>
@@ -129,11 +138,14 @@ export default function CourseCard({
       <RecommendationReason reasons={reasons} />
 
       <div className="card__bottom">
-        {price && <div className="card__price">{price}</div>}
-        <div className="card__footer">
+        <div className="card__meta">
           {duration && <span>⏱ {duration}</span>}
           {students && <span>🧑‍🎓 +{(students / 1000).toFixed(1)}k</span>}
         </div>
+
+        {price && <div className="card__price">{price}</div>}
+
+        {actions}
       </div>
     </div>
   )
@@ -142,33 +154,14 @@ export default function CourseCard({
     <div className="card card--course">
       <div className="card__media">
         {href ? (
-          <Link href={href} aria-label={`Открыть курс ${title}`}>
-            <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" />
+          <Link href={href} className="card__media-link" aria-label={`Открыть курс ${title}`}>
+            <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" unoptimized={isSvgImage} />
           </Link>
         ) : (
-          <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" />
+          <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" unoptimized={isSvgImage} />
         )}
-        <button
-          type="button"
-          onClick={handleBookmark}
-          className="card__favorite"
-          aria-pressed={favorite}
-          aria-label={`${favorite ? 'Убрать из избранного' : 'Добавить в избранное'}: ${title}`}
-        >
-          {favorite ? '❤️' : '🤍'}
-        </button>
       </div>
-      {href ? (
-        <>
-          {content}
-          {actions}
-        </>
-      ) : (
-        <>
-          {content}
-          {actions}
-        </>
-      )}
+      {content}
     </div>
   )
 }

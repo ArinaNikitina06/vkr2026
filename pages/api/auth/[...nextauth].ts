@@ -4,6 +4,9 @@ import { demoUserEmail, getOrCreateUser } from '../../../lib/server/demoUser'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? 'demo-secret-change-before-production',
+  pages: {
+    signIn: '/signin'
+  },
   session: {
     strategy: 'jwt'
   },
@@ -16,6 +19,10 @@ export const authOptions: NextAuthOptions = {
           type: 'email',
           placeholder: 'demo@vkr.local'
         },
+        password: {
+          label: 'Пароль',
+          type: 'password'
+        },
         name: {
           label: 'Имя',
           type: 'text',
@@ -24,13 +31,13 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const email = credentials?.email?.trim() || demoUserEmail
-        const name = credentials?.name?.trim() || email.split('@')[0] || 'Пользователь'
+        const name = credentials?.name?.trim() || undefined
         const user = await getOrCreateUser(email, name)
 
         return {
           id: user.id,
           email: user.email,
-          name: user.name ?? 'Demo user'
+          name: user.name ?? email.split('@')[0] ?? 'Пользователь'
         }
       }
     })

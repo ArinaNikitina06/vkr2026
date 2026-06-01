@@ -1,5 +1,5 @@
 import { getDemoUser } from './demoUser'
-import { ensureCoursesSeeded } from './courseRepository'
+import { courseExists, ensureCoursesSeeded } from './courseRepository'
 import { prisma } from './prisma'
 
 export type InteractionType = 'view' | 'like' | 'hide' | 'bookmark' | 'search'
@@ -11,13 +11,17 @@ export async function saveInteraction(
 ) {
   await ensureCoursesSeeded()
   const user = await getDemoUser()
+  const safeCourseId = courseId && await courseExists(courseId) ? courseId : undefined
+  const safeMetadata = courseId && !safeCourseId
+    ? { ...metadata, skippedCourseId: courseId }
+    : metadata
 
   return prisma.userInteraction.create({
     data: {
       userId: user.id,
-      courseId,
+      courseId: safeCourseId,
       type,
-      metadataJson: metadata ? JSON.stringify(metadata) : undefined
+      metadataJson: safeMetadata ? JSON.stringify(safeMetadata) : undefined
     }
   })
 }

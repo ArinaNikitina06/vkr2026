@@ -29,6 +29,9 @@ export default function CoursePage(): JSX.Element {
   const course = getCourseById(id)
   const includes = course.includes ?? []
   const curriculum = course.curriculum ?? []
+  const heroImage = course.image
+  const previewImage = course.previewImage ?? course.image
+  const instructorImage = course.instructorImage
   const [similarCourses, setSimilarCourses] = useState<RecommendationItem[]>([])
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export default function CoursePage(): JSX.Element {
         <section className="hero-banner">
           <div className="hero-overlay"></div>
           <div className="card__media card__media--hero">
-            <Image src={course.image} alt={course.title} fill priority sizes="100vw" className="card__image" />
+            <Image src={heroImage} alt={course.title} fill priority sizes="100vw" className="card__image" unoptimized={heroImage.endsWith('.svg')} />
           </div>
 
           <div className="hero-content">
@@ -120,7 +123,7 @@ export default function CoursePage(): JSX.Element {
                 <div className="hero-panel">
                   <div className="border-b border-gray-700 pb-6">
                     <div className="course-panel-image-wrapper">
-                      <Image src={course.previewImage ?? course.image} alt={course.title} fill sizes="24rem" className="card__image course-panel-image" />
+                      <Image src={previewImage} alt={course.title} fill sizes="24rem" className="card__image course-panel-image" unoptimized={previewImage.endsWith('.svg')} />
                     </div>
                     <button
                       className="button button--primary button--full"
@@ -153,8 +156,8 @@ export default function CoursePage(): JSX.Element {
               <div className="course-section mb-12 pb-12">
                 <h2 className="section-title text-2xl mb-6">О преподавателе</h2>
                 <div className="flex items-center gap-4">
-                  {course.instructorImage && (
-                    <Image src={course.instructorImage} alt={course.instructor ?? 'Преподаватель курса'} width={64} height={64} className="rounded-full" />
+                  {instructorImage && (
+                    <Image src={instructorImage} alt={course.instructor ?? 'Преподаватель курса'} width={64} height={64} className="rounded-full" unoptimized={instructorImage.endsWith('.svg')} />
                   )}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{course.instructor}</h3>

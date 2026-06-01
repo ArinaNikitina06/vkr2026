@@ -54,34 +54,69 @@ export function mapPrismaCourse(course: PrismaCourse): Course {
 }
 
 export async function ensureCoursesSeeded() {
-  const coursesCount = await prisma.course.count()
+  await Promise.all(
+    mockCourses.map((course) => (
+      prisma.course.upsert({
+        where: {
+          id: course.id
+        },
+        update: {
+          image: course.image,
+          category: course.category,
+          title: course.title,
+          description: course.description,
+          fullDescription: course.fullDescription,
+          previewImage: course.previewImage,
+          instructor: course.instructor,
+          instructorImage: course.instructorImage,
+          tagsJson: JSON.stringify(course.tags),
+          duration: course.duration,
+          students: course.students,
+          level: course.level,
+          rating: course.rating,
+          reviews: course.reviews,
+          price: course.price,
+          includesJson: JSON.stringify(course.includes ?? []),
+          curriculumJson: JSON.stringify(course.curriculum ?? [])
+        },
+        create: {
+          id: course.id,
+          image: course.image,
+          category: course.category,
+          title: course.title,
+          description: course.description,
+          fullDescription: course.fullDescription,
+          previewImage: course.previewImage,
+          instructor: course.instructor,
+          instructorImage: course.instructorImage,
+          tagsJson: JSON.stringify(course.tags),
+          duration: course.duration,
+          students: course.students,
+          level: course.level,
+          rating: course.rating,
+          reviews: course.reviews,
+          price: course.price,
+          includesJson: JSON.stringify(course.includes ?? []),
+          curriculumJson: JSON.stringify(course.curriculum ?? [])
+        }
+      })
+    ))
+  )
+}
 
-  if (coursesCount > 0) {
-    return
-  }
+export async function courseExists(courseId: string): Promise<boolean> {
+  await ensureCoursesSeeded()
 
-  await prisma.course.createMany({
-    data: mockCourses.map((course) => ({
-      id: course.id,
-      image: course.image,
-      category: course.category,
-      title: course.title,
-      description: course.description,
-      fullDescription: course.fullDescription,
-      previewImage: course.previewImage,
-      instructor: course.instructor,
-      instructorImage: course.instructorImage,
-      tagsJson: JSON.stringify(course.tags),
-      duration: course.duration,
-      students: course.students,
-      level: course.level,
-      rating: course.rating,
-      reviews: course.reviews,
-      price: course.price,
-      includesJson: JSON.stringify(course.includes ?? []),
-      curriculumJson: JSON.stringify(course.curriculum ?? [])
-    }))
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId
+    },
+    select: {
+      id: true
+    }
   })
+
+  return Boolean(course)
 }
 
 export async function getCoursesFromDatabase(): Promise<Course[]> {

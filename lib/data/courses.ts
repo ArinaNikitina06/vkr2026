@@ -3,14 +3,14 @@ import type { Course, LearningCourse } from '../types'
 export const courses: Course[] = [
   {
     id: '1',
-    image: '/assets/hero.jpg',
+    image: '/assets/course-design.svg',
     category: 'ДИЗАЙН',
     title: 'Основы UI дизайна',
     description: 'Освойте принципы дизайна интерфейсов, теорию цвета и типографику.',
     fullDescription: 'Этот комплексный курс охватывает все от вайфреймов до высокодетализированных прототипов. Научитесь создавать визуально привлекательные функциональные интерфейсы, которые нравятся пользователям.',
-    previewImage: '/assets/hero.jpg',
+    previewImage: '/assets/course-design.svg',
     instructor: 'Анна Петрова',
-    instructorImage: '/assets/course.png',
+    instructorImage: '/assets/course-design.svg',
     tags: ['Дизайн', 'Начальный'],
     duration: '4ч 20м',
     students: 1200,
@@ -33,7 +33,7 @@ export const courses: Course[] = [
   },
   {
     id: '2',
-    image: '/assets/course.png',
+    image: '/assets/course-code.svg',
     category: 'РАЗРАБОТКА',
     title: 'Fullstack Next.js 14',
     description: 'Создавайте масштабируемые приложения с новейшими возможностями Next.js.',
@@ -47,7 +47,7 @@ export const courses: Course[] = [
   },
   {
     id: '3',
-    image: '/assets/course.png',
+    image: '/assets/course-business.svg',
     category: 'БИЗНЕС',
     title: 'Продакт-менеджмент',
     description: 'Научитесь управлять продуктовыми командами и определять стратегию.',
@@ -61,7 +61,7 @@ export const courses: Course[] = [
   },
   {
     id: '4',
-    image: '/assets/course.png',
+    image: '/assets/course-data.svg',
     category: 'ДАННЫЕ',
     title: 'Data Science с Python',
     description: 'Анализируйте данные и создавайте визуализации с помощью Pandas.',
@@ -75,7 +75,7 @@ export const courses: Course[] = [
   },
   {
     id: '5',
-    image: '/assets/course.png',
+    image: '/assets/course-code.svg',
     category: 'РАЗРАБОТКА',
     title: 'JavaScript для начинающих',
     description: 'Изучите основы программирования на JavaScript с нуля.',
@@ -89,7 +89,7 @@ export const courses: Course[] = [
   },
   {
     id: '6',
-    image: '/assets/course.png',
+    image: '/assets/course-design.svg',
     category: 'ДИЗАЙН',
     title: 'Брендинг и айдентика',
     description: 'Создавайте запоминающиеся бренды и визуальные системы.',
@@ -103,7 +103,7 @@ export const courses: Course[] = [
   },
   {
     id: '7',
-    image: '/assets/course.png',
+    image: '/assets/course-marketing.svg',
     category: 'МАРКЕТИНГ',
     title: 'Цифровой маркетинг',
     description: 'Освойте SEO, контент-маркетинг и социальные сети.',
@@ -117,7 +117,7 @@ export const courses: Course[] = [
   },
   {
     id: '8',
-    image: '/assets/course.png',
+    image: '/assets/course-business.svg',
     category: 'БИЗНЕС',
     title: 'Финансовая грамотность',
     description: 'Управляйте личными финансами и инвестициями эффективно.',

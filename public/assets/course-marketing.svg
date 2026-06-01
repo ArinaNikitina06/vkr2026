@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Иллюстрация курса по маркетингу</title>
+  <desc id="desc">Креативная панель с сообщениями, графиком охвата и кнопкой запуска кампании.</desc>
+  <rect width="800" height="480" fill="#f8fafc"/>
+  <circle cx="620" cy="130" r="92" fill="#ffedd5"/>
+  <circle cx="188" cy="348" r="92" fill="#dbeafe"/>
+  <rect x="116" y="94" width="568" height="292" rx="32" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+  <rect x="160" y="142" width="240" height="28" rx="14" fill="#0f172a"/>
+  <rect x="160" y="206" width="184" height="22" rx="11" fill="#cbd5e1"/>
+  <rect x="160" y="254" width="140" height="54" rx="18" fill="#f97316"/>
+  <rect x="444" y="154" width="160" height="160" rx="80" fill="#38bdf8"/>
+  <path d="M444 234h160" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+  <path d="M524 154v160" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+</svg>

@@ -3,15 +3,35 @@ import { prisma } from './prisma'
 
 export const demoUserEmail = 'demo@vkr.local'
 
-export async function getOrCreateUser(email = demoUserEmail, name = 'Арина') {
+export async function getOrCreateUser(email = demoUserEmail, name?: string) {
+  const fallbackName = email.split('@')[0] || 'Пользователь'
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email
+    }
+  })
+
+  if (existingUser) {
+    if (name) {
+      return prisma.user.update({
+        where: {
+          email
+        },
+        data: {
+          name
+        }
+      })
+    }
+
+    return existingUser
+  }
+
   const user = await prisma.user.upsert({
     where: { email },
-    update: {
-      name
-    },
+    update: {},
     create: {
       email,
-      name,
+      name: name ?? fallbackName,
       preferences: {
         create: {
           goal: defaultPreferences.goal,
@@ -28,5 +48,5 @@ export async function getOrCreateUser(email = demoUserEmail, name = 'Арина'
 }
 
 export async function getDemoUser() {
-  return getOrCreateUser()
+  return getOrCreateUser(demoUserEmail, 'Demo user')
 }

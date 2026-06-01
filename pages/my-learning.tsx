@@ -51,7 +51,7 @@ export default function MyLearning(): JSX.Element {
               {tabData.inProgress.map((course) => (
                 <div key={course.id} className="course-card-row">
                   <div className="course-card-row__media">
-                    <Image src={course.image} alt={course.title} fill sizes="(min-width: 768px) 12rem, 100vw" className="card__image" />
+                    <Image src={course.image} alt={course.title} fill sizes="(min-width: 768px) 12rem, 100vw" className="card__image" unoptimized={course.image.endsWith('.svg')} />
                   </div>
                   <div className="course-card-row__body">
                     <div>
