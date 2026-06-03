@@ -1,5 +1,5 @@
 import Header from '../components/Header'
-import CourseCard from '../components/CourseCard'
+import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import Chip from '../components/ui/Chip'
 import Link from 'next/link'
@@ -111,7 +111,7 @@ export default function Catalog(): JSX.Element {
       <Header />
       <main className="page-layout">
         <section className="page-container section">
-          <h1 className="section-title section-title--lg mb-4">Каталог курсов</h1>
+          <h1 className="section-title section-title--lg section-title--with-subtitle">Каталог курсов</h1>
           <p className="section-subtitle section-subtitle--large">Изучите более 200+ курсов по дизайну, разработке и бизнесу.</p>
         </section>
 
@@ -128,7 +128,7 @@ export default function Catalog(): JSX.Element {
                 className="search-input"
               />
               <button type="submit" className="search-button" aria-label="Поиск">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="search-button__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
@@ -147,7 +147,7 @@ export default function Catalog(): JSX.Element {
             ))}
           </div>
 
-          <div className="filter-buttons mt-4" role="group" aria-label="Фильтр по уровню">
+          <div className="filter-buttons filter-buttons--spaced" role="group" aria-label="Фильтр по уровню">
             {catalogLevels.map((levelItem) => (
               <Chip
                 key={levelItem}
@@ -178,11 +178,7 @@ export default function Catalog(): JSX.Element {
 
         <section className="page-container section">
           {filteredCourses.length > 0 ? (
-            <div className="grid-cards">
-              {filteredCourses.map((course) => (
-                <CourseCard key={course.id} href={`/course/${course.id}`} {...course} />
-              ))}
-            </div>
+            <CourseGrid courses={filteredCourses} />
           ) : (
             <EmptyState
               title="Курсы не найдены"

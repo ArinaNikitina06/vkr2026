@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSessionUserId } from '../../lib/server/apiSession'
 import { saveInteraction, type InteractionType } from '../../lib/server/interactionsRepository'
 
 type InteractionRequest = {
@@ -23,6 +24,13 @@ export default async function handler(
     return
   }
 
+  const userEmail = await getSessionUserId(request, response)
+
+  if (!userEmail) {
+    response.status(401).json({ message: 'Authentication required' })
+    return
+  }
+
   const { courseId, type } = request.body as InteractionRequest
 
   if (!type) {
@@ -30,7 +38,7 @@ export default async function handler(
     return
   }
 
-  await saveInteraction(type, courseId, request.body.metadata)
+  await saveInteraction(userEmail, type, courseId, request.body.metadata)
 
   response.status(200).json({
     ok: true,

@@ -184,6 +184,6 @@ export const catalogCategories = ['Все', 'Разработка', 'Дизай�
 
 export type CatalogCategory = (typeof catalogCategories)[number]
 
-export function getCourseById(id: string | undefined): Course {
-  return courses.find((course) => course.id === id) ?? courses[0]
+export function getCourseById(id: string): Course | undefined {
+  return courses.find((course) => course.id === id)
 }

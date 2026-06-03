@@ -35,16 +35,8 @@ export default function SignIn(): JSX.Element {
     router.push(result?.url ?? callbackUrl)
   }
 
-  const handleDemoSignIn = async () => {
-    const result = await signIn('credentials', {
-      email: email || 'demo@vkr.local',
-      password: password || 'demo',
-      name: 'Demo user',
-      callbackUrl,
-      redirect: false
-    })
-
-    router.push(result?.url ?? callbackUrl)
+  const handleSocialSignIn = () => {
+    setError('Вход через GitHub не подключен в MVP. Используйте email и пароль.')
   }
 
   return (
@@ -113,7 +105,7 @@ export default function SignIn(): JSX.Element {
           <span></span>
         </div>
 
-        <button type="button" className="auth-social" onClick={handleDemoSignIn}>
+        <button type="button" className="auth-social" onClick={handleSocialSignIn}>
           <span aria-hidden="true">⌘</span>
           GitHub
         </button>

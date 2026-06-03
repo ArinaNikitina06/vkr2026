@@ -1,6 +1,5 @@
 import { defaultPreferences } from '../data/preferences'
 import type { CourseLevel, UserPreferences } from '../types'
-import { getDemoUser } from './demoUser'
 import { prisma } from './prisma'
 
 function parseInterests(value: string | null | undefined): string[] {
@@ -16,8 +15,17 @@ function parseInterests(value: string | null | undefined): string[] {
   }
 }
 
-export async function getStoredPreferences(): Promise<UserPreferences> {
-  const user = await getDemoUser()
+export async function getStoredPreferences(userEmail: string): Promise<UserPreferences> {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: userEmail
+    }
+  })
+
+  if (!user) {
+    return defaultPreferences
+  }
+
   const preferences = await prisma.userPreference.findUnique({
     where: {
       userId: user.id
@@ -37,8 +45,17 @@ export async function getStoredPreferences(): Promise<UserPreferences> {
   }
 }
 
-export async function saveStoredPreferences(input: Partial<UserPreferences>): Promise<UserPreferences> {
-  const user = await getDemoUser()
+export async function saveStoredPreferences(userEmail: string, input: Partial<UserPreferences>): Promise<UserPreferences> {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: userEmail
+    }
+  })
+
+  if (!user) {
+    return defaultPreferences
+  }
+
   const nextPreferences: UserPreferences = {
     ...defaultPreferences,
     ...input,

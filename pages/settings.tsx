@@ -101,7 +101,7 @@ export default function Settings(): JSX.Element {
           <div className="settings-page-header">
             <div>
               <h1 className="section-title section-title--lg">Настройки</h1>
-              <p className="section-subtitle mt-2">
+              <p className="section-subtitle section-subtitle--offset">
                 {isOnboarding
                   ? 'Управляйте настройками аккаунта и задайте стартовые параметры рекомендаций.'
                   : 'Управляйте настройками аккаунта и предпочтениями.'}
@@ -110,13 +110,13 @@ export default function Settings(): JSX.Element {
           </div>
 
           {toast && (
-            <div className="mb-6">
+            <div className="settings-alert">
               <Toast tone="success">{toast}</Toast>
             </div>
           )}
 
           {error && (
-            <div className="mb-6">
+            <div className="settings-alert">
               <Toast tone="error">{error}</Toast>
             </div>
           )}

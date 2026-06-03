@@ -20,7 +20,7 @@ export default function RecommendationSection({
           <h2 id={`section-${title}`} className="section-title">
             {title}
           </h2>
-          {description && <p className="section-subtitle mt-2">{description}</p>}
+          {description && <p className="section-subtitle section-subtitle--offset">{description}</p>}
         </div>
         {action}
       </div>

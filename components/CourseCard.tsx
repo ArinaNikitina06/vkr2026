@@ -4,7 +4,7 @@ import { useState } from 'react'
 import RecommendationReason from './RecommendationReason'
 
 type CourseCardProps = {
-  id?: string
+  id: string
   image?: string
   category?: string
   title: string
@@ -24,7 +24,7 @@ type CourseCardProps = {
 }
 
 export default function CourseCard({
-  id = '1',
+  id,
   image = '/assets/course-design.svg',
   category = 'Разработка',
   title = 'Курс',
@@ -90,10 +90,10 @@ export default function CourseCard({
 
   const courseTitle = href ? (
     <Link href={href} className="card__title-link">
-      <h3 className="card__title line-clamp-2">{title}</h3>
+      <h3 className="card__title card__title--clamped">{title}</h3>
     </Link>
   ) : (
-    <h3 className="card__title line-clamp-2">{title}</h3>
+    <h3 className="card__title card__title--clamped">{title}</h3>
   )
 
   const content = (
@@ -105,11 +105,11 @@ export default function CourseCard({
       {courseTitle}
 
       {description && variant === 'full' && (
-        <p className="card__description line-clamp-2">{description}</p>
+        <p className="card__description card__description--clamped">{description}</p>
       )}
 
       {visibleTags.length > 0 && (
-        <div className="form-tags mb-3">
+        <div className="form-tags form-tags--card">
           {visibleTags.map((tag) => (
             disableMetaLinks ? (
               <span key={tag} className="tag">{tag}</span>

@@ -1,14 +1,16 @@
 import Header from '../components/Header'
-import CourseCard from '../components/CourseCard'
+import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import ErrorState from '../components/ErrorState'
+import LearningCourseList from '../components/LearningCourseList'
 import RecommendationSection from '../components/RecommendationSection'
+import RecommendationCourseGrid from '../components/RecommendationCourseGrid'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useStringListStorage } from '../hooks/useStringListStorage'
 import { courses, ongoingCourses } from '../lib/data/courses'
 import {
   defaultPreferences,
@@ -25,24 +27,10 @@ type RecommendationsResponse = {
   }[]
 }
 
-function readStringList(key: string): string[] {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  try {
-    return JSON.parse(window.localStorage.getItem(key) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-function saveStringList(key: string, value: string[]) {
-  window.localStorage.setItem(key, JSON.stringify(value))
-}
-
 export default function Home(): JSX.Element {
   const { data: session, status } = useSession()
+  const hiddenCourseStorage = useStringListStorage(hiddenCoursesStorageKey)
+  const likedCourseStorage = useStringListStorage(likedCoursesStorageKey)
   const isAuthenticated = status === 'authenticated'
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [hiddenCourseIds, setHiddenCourseIds] = useState<string[]>([])
@@ -56,7 +44,7 @@ export default function Home(): JSX.Element {
     ? `Добрый день, ${userName}`
     : 'Добрый день'
 
-  const loadRecommendations = async (nextPreferences: UserPreferences, nextHiddenCourseIds: string[]) => {
+  const loadRecommendations = useCallback(async (nextPreferences: UserPreferences, nextHiddenCourseIds: string[]) => {
     setIsLoading(true)
     setRecommendationsError(false)
 
@@ -66,7 +54,7 @@ export default function Home(): JSX.Element {
         level: nextPreferences.level,
         interests: nextPreferences.interests.join(','),
         hidden: nextHiddenCourseIds.join(','),
-        liked: readStringList(likedCoursesStorageKey).join(',')
+        liked: likedCourseStorage.read().join(',')
       })
 
       const response = await fetch(`/api/recommendations?${params.toString()}`)
@@ -84,7 +72,7 @@ export default function Home(): JSX.Element {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [likedCourseStorage])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -98,12 +86,12 @@ export default function Home(): JSX.Element {
 
     const savedPreferences = window.localStorage.getItem(preferencesStorageKey)
     const nextPreferences = savedPreferences ? JSON.parse(savedPreferences) : defaultPreferences
-    const nextHiddenCourseIds = readStringList(hiddenCoursesStorageKey)
+    const nextHiddenCourseIds = hiddenCourseStorage.read()
 
     setPreferences(nextPreferences)
     setHiddenCourseIds(nextHiddenCourseIds)
     loadRecommendations(nextPreferences, nextHiddenCourseIds)
-  }, [isAuthenticated, status])
+  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, status])
 
   const sendInteraction = async (courseId: string, type: 'like' | 'hide') => {
     await fetch('/api/interactions', {
@@ -118,15 +106,15 @@ export default function Home(): JSX.Element {
   const handleHide = (courseId: string) => {
     const nextHiddenIds = Array.from(new Set([...hiddenCourseIds, courseId]))
     setHiddenCourseIds(nextHiddenIds)
-    saveStringList(hiddenCoursesStorageKey, nextHiddenIds)
+    hiddenCourseStorage.save(nextHiddenIds)
     sendInteraction(courseId, 'hide')
     loadRecommendations(preferences, nextHiddenIds)
     setToast('Курс скрыт из рекомендаций')
   }
 
   const handleLike = (courseId: string) => {
-    const nextLikedIds = Array.from(new Set([...readStringList(likedCoursesStorageKey), courseId]))
-    saveStringList(likedCoursesStorageKey, nextLikedIds)
+    const nextLikedIds = Array.from(new Set([...likedCourseStorage.read(), courseId]))
+    likedCourseStorage.save(nextLikedIds)
     sendInteraction(courseId, 'like')
     loadRecommendations(preferences, hiddenCourseIds)
     setToast('Отметка учтена для будущих рекомендаций')
@@ -152,16 +140,11 @@ export default function Home(): JSX.Element {
               </Link>
             </div>
 
-            <div className="grid-cards">
-              {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  href={`/signin?callbackUrl=${encodeURIComponent(`/course/${course.id}`)}`}
-                  disableMetaLinks
-                  {...course}
-                />
-              ))}
-            </div>
+            <CourseGrid
+              courses={courses}
+              getHref={(course) => `/signin?callbackUrl=${encodeURIComponent(`/course/${course.id}`)}`}
+              disableMetaLinks
+            />
           </section>
         </main>
       </>
@@ -178,7 +161,7 @@ export default function Home(): JSX.Element {
           </div>
           <p className="section-subtitle">Готовы продолжить обучение сегодня?</p>
           {!preferences.onboarded && (
-            <div className="mt-4">
+            <div className="section__action">
               <Link href="/settings" className="link link--small">
                 Настроить цель и интересы для персональных рекомендаций
               </Link>
@@ -193,8 +176,8 @@ export default function Home(): JSX.Element {
         )}
 
         <section className="page-container section">
-          <div className="grid gap-6 lg:grid-cols-4">
-            <div className="lg:col-span-4">
+          <div className="home-learning-layout">
+            <div className="home-learning-layout__header">
               <div className="section-heading">
                 <h2 className="section-title">Продолжить обучение</h2>
                 <Link href="/my-learning" className="link link--small">
@@ -203,39 +186,8 @@ export default function Home(): JSX.Element {
               </div>
             </div>
 
-            <div className="lg:col-span-2">
-              <div className="space-y-4">
-                {ongoingCourses.map((course) => (
-                  <div key={course.id} className="card card--course w-full">
-                    <div className="card__media card__media--compact">
-                      <Image src={course.image} alt={course.title} fill sizes="(min-width: 1024px) 50vw, 100vw" className="card__image" unoptimized={course.image.endsWith('.svg')} />
-                    </div>
-                    <div className="card__body">
-                      <div className="card__header">
-                        <span className="card__badge">{course.category}</span>
-                      </div>
-                      <h3 className="card__title">{course.title}</h3>
-                      <p className="card__description">{course.description}</p>
-
-                      {course.progress && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-600">Прогресс</span>
-                            <span className="text-sm font-medium text-gray-900">{course.progress}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-gray-800 h-2 rounded-full" style={{ width: `${course.progress}%` }}></div>
-                          </div>
-                        </div>
-                      )}
-
-                      <button className="button button--secondary button--full" type="button">
-                        Продолжить курс
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="home-learning">
+              <LearningCourseList courses={ongoingCourses} />
             </div>
           </div>
         </section>
@@ -261,18 +213,7 @@ export default function Home(): JSX.Element {
               )}
             />
           ) : personalRecommendations.length > 0 ? (
-            <div className="grid-cards">
-              {personalRecommendations.map((item) => (
-                <CourseCard
-                  key={item.course.id}
-                  href={`/course/${item.course.id}`}
-                  reasons={item.reasons}
-                  onLike={handleLike}
-                  onHide={handleHide}
-                  {...item.course}
-                />
-              ))}
-            </div>
+            <RecommendationCourseGrid items={personalRecommendations} onLike={handleLike} onHide={handleHide} />
           ) : (
             <EmptyState
               title="Все рекомендации скрыты"
@@ -303,18 +244,7 @@ export default function Home(): JSX.Element {
               )}
             />
           ) : (
-            <div className="grid-cards">
-              {interestRecommendations.map((item) => (
-                <CourseCard
-                  key={item.course.id}
-                  href={`/course/${item.course.id}`}
-                  reasons={item.reasons}
-                  onLike={handleLike}
-                  onHide={handleHide}
-                  {...item.course}
-                />
-              ))}
-            </div>
+            <RecommendationCourseGrid items={interestRecommendations} onLike={handleLike} onHide={handleHide} />
           )}
         </RecommendationSection>
       </main>

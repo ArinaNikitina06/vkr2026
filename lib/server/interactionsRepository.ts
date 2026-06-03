@@ -1,16 +1,25 @@
-import { getDemoUser } from './demoUser'
 import { courseExists, ensureCoursesSeeded } from './courseRepository'
 import { prisma } from './prisma'
 
 export type InteractionType = 'view' | 'like' | 'hide' | 'bookmark' | 'search'
 
 export async function saveInteraction(
+  userEmail: string,
   type: InteractionType,
   courseId?: string,
   metadata?: Record<string, unknown>
 ) {
   await ensureCoursesSeeded()
-  const user = await getDemoUser()
+  const user = await prisma.user.findUnique({
+    where: {
+      email: userEmail
+    }
+  })
+
+  if (!user) {
+    return null
+  }
+
   const safeCourseId = courseId && await courseExists(courseId) ? courseId : undefined
   const safeMetadata = courseId && !safeCourseId
     ? { ...metadata, skippedCourseId: courseId }
@@ -26,9 +35,17 @@ export async function saveInteraction(
   })
 }
 
-export async function enrollDemoUser(courseId: string) {
+export async function enrollUser(userEmail: string, courseId: string) {
   await ensureCoursesSeeded()
-  const user = await getDemoUser()
+  const user = await prisma.user.findUnique({
+    where: {
+      email: userEmail
+    }
+  })
+
+  if (!user) {
+    return null
+  }
 
   return prisma.enrollment.upsert({
     where: {

@@ -1,13 +1,16 @@
 import Header from '../../components/Header'
-import CourseCard from '../../components/CourseCard'
+import CourseCurriculum from '../../components/CourseCurriculum'
+import CourseIncludes from '../../components/CourseIncludes'
+import CourseInstructor from '../../components/CourseInstructor'
 import EmptyState from '../../components/EmptyState'
 import ErrorState from '../../components/ErrorState'
 import RecommendationSection from '../../components/RecommendationSection'
+import RecommendationCourseGrid from '../../components/RecommendationCourseGrid'
 import SkeletonCard from '../../components/SkeletonCard'
 import Toast from '../../components/ui/Toast'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { useRouteParam } from '../../hooks/useRouteParam'
 import { getCourseById } from '../../lib/data/courses'
 import type { RecommendationItem } from '../../lib/types'
 
@@ -19,30 +22,29 @@ type RecommendationsResponse = {
 }
 
 export default function CoursePage(): JSX.Element {
-  const router = useRouter()
-  const [favorite, setFavorite] = useState(false)
+  const courseId = useRouteParam('id')
   const [enrolled, setEnrolled] = useState(false)
   const [error, setError] = useState('')
   const [similarCoursesError, setSimilarCoursesError] = useState(false)
   const [isSimilarCoursesLoading, setIsSimilarCoursesLoading] = useState(true)
-  const id = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id
-  const course = getCourseById(id)
-  const includes = course.includes ?? []
-  const curriculum = course.curriculum ?? []
-  const heroImage = course.image
-  const previewImage = course.previewImage ?? course.image
-  const instructorImage = course.instructorImage
+  const course = courseId ? getCourseById(courseId) : undefined
   const [similarCourses, setSimilarCourses] = useState<RecommendationItem[]>([])
 
+  const includes = course?.includes ?? []
+  const curriculum = course?.curriculum ?? []
+  const heroImage = course?.image ?? '/assets/course-design.svg'
+  const previewImage = course?.previewImage ?? heroImage
+  const instructorImage = course?.instructorImage
+
   useEffect(() => {
-    if (!id) {
+    if (!courseId || !course) {
       return
     }
 
     setIsSimilarCoursesLoading(true)
     setSimilarCoursesError(false)
 
-    fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(id)}`)
+    fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(courseId)}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Similar courses request failed')
@@ -61,9 +63,38 @@ export default function CoursePage(): JSX.Element {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ courseId: id, type: 'view' })
+      body: JSON.stringify({ courseId, type: 'view' })
     })
-  }, [id])
+  }, [course, courseId])
+
+  if (!courseId) {
+    return (
+      <>
+        <Header />
+        <main className="page-layout">
+          <section className="page-container section">
+            <SkeletonCard count={1} />
+          </section>
+        </main>
+      </>
+    )
+  }
+
+  if (!course) {
+    return (
+      <>
+        <Header />
+        <main className="page-layout">
+          <section className="page-container section">
+            <EmptyState
+              title="Курс не найден"
+              description="Вернитесь в каталог и выберите другой курс."
+            />
+          </section>
+        </main>
+      </>
+    )
+  }
 
   const enrollCourse = async () => {
     setError('')
@@ -99,29 +130,20 @@ export default function CoursePage(): JSX.Element {
           </div>
 
           <div className="hero-content">
-            <div className="page-container w-full">
+            <div className="page-container page-container--full">
               <div className="hero-grid">
                 <div className="hero-summary">
                   <span className="course-category">{course.category}</span>
-                  <h1 className="section-title section-title--lg mt-2 mb-4 text-white">{course.title}</h1>
+                  <h1 className="course-hero-title">{course.title}</h1>
                   <p className="hero-description">{course.description}</p>
                   <div className="course-meta">
                     <span className="course-meta__item">⭐ {course.rating} ({course.reviews} отзывов)</span>
                     <span className="course-meta__item">🧑‍🎓 {(course.students / 1000).toFixed(0)}k студентов</span>
-                    <button
-                      type="button"
-                      className={`course-meta__favorite ${favorite ? 'course-meta__favorite--active' : ''}`}
-                      aria-pressed={favorite}
-                      aria-label={`${favorite ? 'Убрать из избранного' : 'Добавить в избранное'}: ${course.title}`}
-                      onClick={() => setFavorite((prev) => !prev)}
-                    >
-                      <span>{favorite ? '❤️' : '🤍'}</span>
-                    </button>
                   </div>
                 </div>
 
                 <div className="hero-panel">
-                  <div className="border-b border-gray-700 pb-6">
+                  <div className="hero-panel__preview">
                     <div className="course-panel-image-wrapper">
                       <Image src={previewImage} alt={course.title} fill sizes="24rem" className="card__image course-panel-image" unoptimized={previewImage.endsWith('.svg')} />
                     </div>
@@ -133,17 +155,7 @@ export default function CoursePage(): JSX.Element {
                       {enrolled ? 'Вы записаны' : 'Записаться'}
                     </button>
                   </div>
-                  <div className="text-white space-y-3 text-sm">
-                    <h3 className="font-semibold mb-3">Этот курс включает:</h3>
-                    {includes.map((item) => (
-                      <div key={item} className="flex items-start gap-2">
-                        <svg className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <CourseIncludes items={includes} />
                 </div>
               </div>
             </div>
@@ -153,46 +165,14 @@ export default function CoursePage(): JSX.Element {
         <section className="page-container section">
           <div className="course-layout">
             <div className="course-main">
-              <div className="course-section mb-12 pb-12">
-                <h2 className="section-title text-2xl mb-6">О преподавателе</h2>
-                <div className="flex items-center gap-4">
-                  {instructorImage && (
-                    <Image src={instructorImage} alt={course.instructor ?? 'Преподаватель курса'} width={64} height={64} className="rounded-full" unoptimized={instructorImage.endsWith('.svg')} />
-                  )}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{course.instructor}</h3>
-                    <p className="text-gray-600">Продуктовый дизайнер из Сан-Франциско. Научу React и Next.js.</p>
-                  </div>
-                </div>
-              </div>
+              <CourseInstructor name={course.instructor} image={instructorImage} />
 
-              <div className="settings-section mb-12 pb-12">
-                <h2 className="section-title text-2xl mb-4">О курсе</h2>
-                  <p className="text-gray-700 text-lg leading-relaxed">{course.fullDescription ?? course.description}</p>
-              </div>
+              <section className="course-section">
+                <h2 className="course-section__title">О курсе</h2>
+                <p className="course-section__text">{course.fullDescription ?? course.description}</p>
+              </section>
 
-              <div>
-                <h2 className="section-title text-2xl mb-6">Содержание курса</h2>
-                <div className="space-y-3">
-                  {curriculum.map((section) => (
-                    <div key={section.title} className="card card--course p-4 rounded-lg">
-                      <button
-                        className="w-full flex items-center justify-between text-left"
-                        type="button"
-                        aria-label={`Открыть раздел ${section.title}`}
-                      >
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{section.title}</h3>
-                          <p className="text-sm text-gray-600">{section.sections} уроков</p>
-                        </div>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CourseCurriculum sections={curriculum} />
             </div>
 
             <aside className="course-sidebar">
@@ -214,7 +194,7 @@ export default function CoursePage(): JSX.Element {
                 </div>
 
                 <button
-                  className="button button--primary button--full mt-6"
+                  className="button button--primary button--full info-box__button"
                   type="button"
                   onClick={enrollCourse}
                 >
@@ -246,16 +226,7 @@ export default function CoursePage(): JSX.Element {
           ) : similarCoursesError ? (
             <ErrorState description="Не получилось загрузить похожие курсы." />
           ) : similarCourses.length > 0 ? (
-            <div className="grid-cards">
-              {similarCourses.map((item) => (
-                <CourseCard
-                  key={item.course.id}
-                  href={`/course/${item.course.id}`}
-                  reasons={item.reasons}
-                  {...item.course}
-                />
-              ))}
-            </div>
+            <RecommendationCourseGrid items={similarCourses} />
           ) : (
             <EmptyState
               title="Похожие курсы не найдены"

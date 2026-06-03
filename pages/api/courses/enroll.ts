@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getCoursesFromDatabase } from '../../../lib/server/courseRepository'
-import { enrollDemoUser } from '../../../lib/server/interactionsRepository'
+import { getSessionUserId } from '../../../lib/server/apiSession'
+import { enrollUser } from '../../../lib/server/interactionsRepository'
 
 type EnrollResponse = {
   ok: boolean
@@ -18,10 +19,17 @@ export default async function handler(
     return
   }
 
+  const userEmail = await getSessionUserId(request, response)
+
+  if (!userEmail) {
+    response.status(401).json({ message: 'Authentication required' })
+    return
+  }
+
   const courseId = String(request.body?.courseId ?? '')
   const courses = await getCoursesFromDatabase()
   const course = courses.find((item) => item.id === courseId) ?? courses[0]
-  await enrollDemoUser(course.id)
+  await enrollUser(userEmail, course.id)
 
   response.status(200).json({
     ok: true,
