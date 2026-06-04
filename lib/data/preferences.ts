@@ -19,7 +19,7 @@ export const preferenceLevels = ['Начальный', 'Средний', 'Про
 
 export const defaultPreferences: UserPreferences = {
   goal: 'Смена карьеры',
-  interests: ['Дизайн', 'Разработка'],
+  interests: [],
   level: 'Начальный',
   consent: false,
   onboarded: false
@@ -29,3 +29,7 @@ export const preferencesStorageKey = 'eduflow.preferences'
 export const hiddenCoursesStorageKey = 'eduflow.hiddenCourses'
 export const likedCoursesStorageKey = 'eduflow.likedCourses'
 export const bookmarkedCoursesStorageKey = 'eduflow.bookmarkedCourses'
+
+export function getUserPreferencesStorageKey(email?: string | null): string {
+  return email ? `${preferencesStorageKey}.${email}` : preferencesStorageKey
+}

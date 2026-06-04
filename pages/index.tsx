@@ -8,15 +8,16 @@ import RecommendationCourseGrid from '../components/RecommendationCourseGrid'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
 import Link from 'next/link'
+import PreferencesModal from '../components/PreferencesModal'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useStringListStorage } from '../hooks/useStringListStorage'
 import { courses, ongoingCourses } from '../lib/data/courses'
 import {
   defaultPreferences,
+  getUserPreferencesStorageKey,
   hiddenCoursesStorageKey,
   likedCoursesStorageKey,
-  preferencesStorageKey
 } from '../lib/data/preferences'
 import type { RecommendationItem, UserPreferences } from '../lib/types'
 
@@ -40,6 +41,7 @@ export default function Home(): JSX.Element {
   const [recommendationsError, setRecommendationsError] = useState(false)
   const [toast, setToast] = useState<string>('')
   const userName = session?.user?.name ?? session?.user?.email
+  const userPreferencesStorageKey = getUserPreferencesStorageKey(session?.user?.email)
   const greeting = isAuthenticated && userName
     ? `Добрый день, ${userName}`
     : 'Добрый день'
@@ -84,14 +86,38 @@ export default function Home(): JSX.Element {
       return
     }
 
-    const savedPreferences = window.localStorage.getItem(preferencesStorageKey)
+    const savedPreferences = window.localStorage.getItem(userPreferencesStorageKey)
     const nextPreferences = savedPreferences ? JSON.parse(savedPreferences) : defaultPreferences
     const nextHiddenCourseIds = hiddenCourseStorage.read()
 
     setPreferences(nextPreferences)
     setHiddenCourseIds(nextHiddenCourseIds)
-    loadRecommendations(nextPreferences, nextHiddenCourseIds)
-  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, status])
+    if (nextPreferences.onboarded) {
+      loadRecommendations(nextPreferences, nextHiddenCourseIds)
+    } else {
+      setIsLoading(false)
+    }
+  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, status, userPreferencesStorageKey])
+
+  const handleSavePreferences = async (nextPreferences: UserPreferences) => {
+    setPreferences(nextPreferences)
+    window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
+    setToast('Настройки сохранены, рекомендации обновлены')
+
+    try {
+      await fetch('/api/user/preferences', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nextPreferences)
+      })
+    } catch {
+      setToast('Настройки сохранены локально')
+    }
+
+    loadRecommendations(nextPreferences, hiddenCourseIds)
+  }
 
   const sendInteraction = async (courseId: string, type: 'like' | 'hide') => {
     await fetch('/api/interactions', {
@@ -154,6 +180,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       <Header />
+      {!preferences.onboarded && <PreferencesModal onSave={handleSavePreferences} />}
       <main className="page-layout">
         <section className="page-container section section--compact">
           <div className="section__header">

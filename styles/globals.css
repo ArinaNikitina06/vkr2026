@@ -767,6 +767,34 @@ body {
   @apply cursor-not-allowed bg-gray-50 text-gray-500;
 }
 
+.preferences-modal {
+  @apply fixed inset-0 z-[100] flex items-center justify-center px-4 py-8;
+}
+
+.preferences-modal__backdrop {
+  @apply absolute inset-0 bg-slate-950/50 backdrop-blur-sm;
+}
+
+.preferences-modal__panel {
+  @apply relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-gray-200 bg-white p-6 shadow-2xl sm:p-8;
+}
+
+.preferences-modal__consent {
+  @apply mt-4 flex items-center gap-3 text-sm font-medium text-gray-800 lg:mt-0;
+}
+
+.preferences-modal__consent input {
+  @apply h-5 w-5 rounded border-gray-300;
+}
+
+.preferences-modal__error {
+  @apply mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700;
+}
+
+.preferences-modal__actions {
+  @apply mt-6 flex justify-end;
+}
+
 .settings-textarea {
   @apply min-h-20 resize-none;
 }
