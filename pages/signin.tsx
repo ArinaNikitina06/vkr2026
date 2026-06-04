@@ -1,9 +1,17 @@
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useState, type FormEvent } from 'react'
+import { createPendingOnboardingValue, pendingOnboardingStorageKey } from '../lib/data/preferences'
+import { normalizeUserName } from '../lib/userDisplay'
 
 function getQueryValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? '/' : value ?? '/'
+  const queryValue = Array.isArray(value) ? value[0] : value
+
+  if (!queryValue || queryValue.startsWith('http')) {
+    return '/'
+  }
+
+  return queryValue.startsWith('/') ? queryValue : '/'
 }
 
 export default function SignIn(): JSX.Element {
@@ -19,20 +27,30 @@ export default function SignIn(): JSX.Element {
     event.preventDefault()
     setError('')
 
-    const result = await signIn('credentials', {
+    const credentials = {
       email,
       password,
-      name: isRegisterMode ? name : undefined,
+      mode: isRegisterMode ? 'register' : 'login',
       callbackUrl,
       redirect: false
-    })
+    }
+
+    const result = await signIn('credentials', isRegisterMode
+      ? { ...credentials, name: normalizeUserName(name) }
+      : credentials)
 
     if (result?.error) {
       setError(isRegisterMode ? 'Не удалось зарегистрироваться. Проверьте данные.' : 'Не удалось войти. Проверьте email и пароль.')
       return
     }
 
-    router.push(result?.url ?? callbackUrl)
+    if (isRegisterMode) {
+      window.localStorage.setItem(pendingOnboardingStorageKey, createPendingOnboardingValue(email))
+      router.push('/?onboarding=1')
+      return
+    }
+
+    router.push(callbackUrl)
   }
 
   const handleSocialSignIn = () => {

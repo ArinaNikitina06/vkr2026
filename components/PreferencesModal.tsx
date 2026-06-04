@@ -15,17 +15,28 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [error, setError] = useState('')
 
-  const toggleInterest = (interest: string) => {
+  const addInterest = (interest: string) => {
+    if (!interest) {
+      return
+    }
+
     setPreferences((currentPreferences) => {
-      const interests = currentPreferences.interests.includes(interest)
-        ? currentPreferences.interests.filter((item) => item !== interest)
-        : [...currentPreferences.interests, interest]
+      if (currentPreferences.interests.includes(interest)) {
+        return currentPreferences
+      }
 
       return {
         ...currentPreferences,
-        interests
+        interests: [...currentPreferences.interests, interest]
       }
     })
+  }
+
+  const removeInterest = (interest: string) => {
+    setPreferences((currentPreferences) => ({
+      ...currentPreferences,
+      interests: currentPreferences.interests.filter((item) => item !== interest)
+    }))
   }
 
   const handleSubmit = () => {
@@ -50,13 +61,13 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
       <div className="preferences-modal__backdrop" />
       <section className="preferences-modal__panel">
         <div className="settings-section">
-          <h2 id="preferences-modal-title" className="section-title text-2xl mb-2">
+          <h2 id="preferences-modal-title" className="preferences-modal__title">
             Цели обучения
           </h2>
-          <p className="section-subtitle mb-6">Настройте свои рекомендации.</p>
+          <p className="preferences-modal__subtitle">Настройте свои рекомендации.</p>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-900 mb-2" htmlFor="learning-goal">
+            <label className="settings-label" htmlFor="learning-goal">
               Основная цель
             </label>
             <select
@@ -72,27 +83,42 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
           </div>
 
           <div className="form-group">
-            <span className="block text-sm font-medium text-gray-900 mb-2">Интересы</span>
-            <div className="form-tags">
-              {preferenceInterests.map((interest) => {
-                const isSelected = preferences.interests.includes(interest)
-
-                return (
+            <label className="settings-label" htmlFor="learning-interest">
+              Интересы
+            </label>
+            <select
+              id="learning-interest"
+              value=""
+              onChange={(event) => addInterest(event.target.value)}
+              className="settings-input"
+            >
+              <option value="">Выберите направление</option>
+              {preferenceInterests.map((interest) => (
+                <option key={interest} value={interest} disabled={preferences.interests.includes(interest)}>
+                  {interest}
+                </option>
+              ))}
+            </select>
+            {preferences.interests.length > 0 && (
+              <div className="preferences-modal__selected-interests" aria-label="Выбранные интересы">
+                {preferences.interests.map((interest) => (
                   <button
                     key={interest}
                     type="button"
-                    onClick={() => toggleInterest(interest)}
-                    className={`filter-button ${isSelected ? 'filter-button--active' : 'filter-button--inactive'}`}
+                    className="preferences-modal__selected-interest"
+                    onClick={() => removeInterest(interest)}
+                    aria-label={`Убрать интерес ${interest}`}
                   >
                     {interest}
+                    <span aria-hidden="true">×</span>
                   </button>
-                )
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-900 mb-2" htmlFor="learning-level">
+            <label className="settings-label" htmlFor="learning-level">
               Уровень подготовки
             </label>
             <select
@@ -110,8 +136,8 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
 
         <div className="settings-summary">
           <div>
-            <h3 className="text-md font-semibold text-gray-900">Персонализированные рекомендации</h3>
-            <p className="text-gray-600 text-sm">
+            <h3 className="settings-subtitle">Персонализированные рекомендации</h3>
+            <p className="section-subtitle">
               Платформа использует выбранные цели и интересы, чтобы показать стартовую подборку курсов.
             </p>
           </div>

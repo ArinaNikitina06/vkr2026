@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { getOrCreateUser } from './userRepository'
+import { getUserDisplayName, normalizeUserName } from '../userDisplay'
+import { createUser, getUserByEmail } from './userRepository'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? 'demo-secret-change-before-production',
@@ -27,6 +28,10 @@ export const authOptions: NextAuthOptions = {
           label: 'Имя',
           type: 'text',
           placeholder: 'Арина'
+        },
+        mode: {
+          label: 'Режим',
+          type: 'text'
         }
       },
       async authorize(credentials) {
@@ -36,13 +41,21 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const name = credentials?.name?.trim() || undefined
-        const user = await getOrCreateUser(email, name)
+        const name = normalizeUserName(credentials?.name)
+        const isRegisterMode = credentials?.mode === 'register'
+        const existingUser = await getUserByEmail(email)
+        const user = isRegisterMode
+          ? existingUser ? null : await createUser(email, name)
+          : existingUser
+
+        if (!user) {
+          return null
+        }
 
         return {
           id: user.id,
           email: user.email,
-          name: user.name ?? user.email.split('@')[0] ?? 'Пользователь'
+          name: getUserDisplayName(user.name, user.email)
         }
       }
     })

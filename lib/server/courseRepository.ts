@@ -3,6 +3,25 @@ import type { Course, CourseCategory, CourseLevel, CurriculumItem } from '../typ
 import { prisma } from './prisma'
 
 type PrismaCourse = Awaited<ReturnType<typeof prisma.course.findMany>>[number]
+type CourseSeedData = {
+  image: string
+  category: CourseCategory
+  title: string
+  description: string
+  fullDescription?: string
+  previewImage?: string
+  instructor?: string
+  instructorImage?: string
+  tagsJson: string
+  duration: string
+  students: number
+  level: CourseLevel
+  rating: number
+  reviews: number
+  price?: string
+  includesJson: string
+  curriculumJson: string
+}
 
 function parseJsonList(value: string | null | undefined): string[] {
   if (!value) {
@@ -53,54 +72,44 @@ export function mapPrismaCourse(course: PrismaCourse): Course {
   }
 }
 
+function createCourseSeedData(course: Course): CourseSeedData {
+  return {
+    image: course.image,
+    category: course.category,
+    title: course.title,
+    description: course.description,
+    fullDescription: course.fullDescription,
+    previewImage: course.previewImage,
+    instructor: course.instructor,
+    instructorImage: course.instructorImage,
+    tagsJson: JSON.stringify(course.tags),
+    duration: course.duration,
+    students: course.students,
+    level: course.level,
+    rating: course.rating,
+    reviews: course.reviews,
+    price: course.price,
+    includesJson: JSON.stringify(course.includes ?? []),
+    curriculumJson: JSON.stringify(course.curriculum ?? [])
+  }
+}
+
 export async function ensureCoursesSeeded() {
   await Promise.all(
-    mockCourses.map((course) => (
-      prisma.course.upsert({
+    mockCourses.map((course) => {
+      const courseData = createCourseSeedData(course)
+
+      return prisma.course.upsert({
         where: {
           id: course.id
         },
-        update: {
-          image: course.image,
-          category: course.category,
-          title: course.title,
-          description: course.description,
-          fullDescription: course.fullDescription,
-          previewImage: course.previewImage,
-          instructor: course.instructor,
-          instructorImage: course.instructorImage,
-          tagsJson: JSON.stringify(course.tags),
-          duration: course.duration,
-          students: course.students,
-          level: course.level,
-          rating: course.rating,
-          reviews: course.reviews,
-          price: course.price,
-          includesJson: JSON.stringify(course.includes ?? []),
-          curriculumJson: JSON.stringify(course.curriculum ?? [])
-        },
+        update: courseData,
         create: {
           id: course.id,
-          image: course.image,
-          category: course.category,
-          title: course.title,
-          description: course.description,
-          fullDescription: course.fullDescription,
-          previewImage: course.previewImage,
-          instructor: course.instructor,
-          instructorImage: course.instructorImage,
-          tagsJson: JSON.stringify(course.tags),
-          duration: course.duration,
-          students: course.students,
-          level: course.level,
-          rating: course.rating,
-          reviews: course.reviews,
-          price: course.price,
-          includesJson: JSON.stringify(course.includes ?? []),
-          curriculumJson: JSON.stringify(course.curriculum ?? [])
+          ...courseData
         }
       })
-    ))
+    })
   )
 }
 

@@ -8,6 +8,7 @@ import RecommendationCourseGrid from '../components/RecommendationCourseGrid'
 import SkeletonCard from '../components/SkeletonCard'
 import Toast from '../components/ui/Toast'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import PreferencesModal from '../components/PreferencesModal'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -17,8 +18,11 @@ import {
   defaultPreferences,
   getUserPreferencesStorageKey,
   hiddenCoursesStorageKey,
+  isPendingOnboardingForUser,
   likedCoursesStorageKey,
+  pendingOnboardingStorageKey,
 } from '../lib/data/preferences'
+import { getUserDisplayName } from '../lib/userDisplay'
 import type { RecommendationItem, UserPreferences } from '../lib/types'
 
 type RecommendationsResponse = {
@@ -29,6 +33,7 @@ type RecommendationsResponse = {
 }
 
 export default function Home(): JSX.Element {
+  const router = useRouter()
   const { data: session, status } = useSession()
   const hiddenCourseStorage = useStringListStorage(hiddenCoursesStorageKey)
   const likedCourseStorage = useStringListStorage(likedCoursesStorageKey)
@@ -39,8 +44,9 @@ export default function Home(): JSX.Element {
   const [interestRecommendations, setInterestRecommendations] = useState<RecommendationItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [recommendationsError, setRecommendationsError] = useState(false)
+  const [shouldShowOnboardingModal, setShouldShowOnboardingModal] = useState(false)
   const [toast, setToast] = useState<string>('')
-  const userName = session?.user?.name ?? session?.user?.email
+  const userName = isAuthenticated ? getUserDisplayName(session?.user?.name, session?.user?.email) : ''
   const userPreferencesStorageKey = getUserPreferencesStorageKey(session?.user?.email)
   const greeting = isAuthenticated && userName
     ? `Добрый день, ${userName}`
@@ -77,7 +83,7 @@ export default function Home(): JSX.Element {
   }, [likedCourseStorage])
 
   useEffect(() => {
-    if (status === 'loading') {
+    if (status === 'loading' || !router.isReady) {
       return
     }
 
@@ -89,19 +95,28 @@ export default function Home(): JSX.Element {
     const savedPreferences = window.localStorage.getItem(userPreferencesStorageKey)
     const nextPreferences = savedPreferences ? JSON.parse(savedPreferences) : defaultPreferences
     const nextHiddenCourseIds = hiddenCourseStorage.read()
+    const pendingOnboardingValue = window.localStorage.getItem(pendingOnboardingStorageKey)
+    const isPendingOnboarding = isPendingOnboardingForUser(pendingOnboardingValue, session?.user?.email)
+    const isRegistrationOnboarding = router.query.onboarding === '1'
+    const shouldOpenOnboarding = (isRegistrationOnboarding || isPendingOnboarding) && !nextPreferences.onboarded
 
     setPreferences(nextPreferences)
     setHiddenCourseIds(nextHiddenCourseIds)
+    setShouldShowOnboardingModal(shouldOpenOnboarding)
+    window.localStorage.removeItem(pendingOnboardingStorageKey)
     if (nextPreferences.onboarded) {
       loadRecommendations(nextPreferences, nextHiddenCourseIds)
     } else {
       setIsLoading(false)
     }
-  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, status, userPreferencesStorageKey])
+  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, router, status, userPreferencesStorageKey])
 
   const handleSavePreferences = async (nextPreferences: UserPreferences) => {
     setPreferences(nextPreferences)
     window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
+    window.localStorage.removeItem(pendingOnboardingStorageKey)
+    setShouldShowOnboardingModal(false)
+    router.replace('/', undefined, { shallow: true })
     setToast('Настройки сохранены, рекомендации обновлены')
 
     try {
@@ -180,7 +195,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       <Header />
-      {!preferences.onboarded && <PreferencesModal onSave={handleSavePreferences} />}
+      {shouldShowOnboardingModal && <PreferencesModal onSave={handleSavePreferences} />}
       <main className="page-layout">
         <section className="page-container section section--compact">
           <div className="section__header">

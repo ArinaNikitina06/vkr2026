@@ -1,34 +1,28 @@
 import { defaultPreferences } from '../data/preferences'
+import { normalizeUserName } from '../userDisplay'
 import { prisma } from './prisma'
 
-export async function getOrCreateUser(email: string, name?: string) {
-  const safeEmail = email.trim().toLowerCase()
-  const fallbackName = safeEmail.split('@')[0] || 'Пользователь'
-  const existingUser = await prisma.user.findUnique({
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
+export async function getUserByEmail(email: string) {
+  return prisma.user.findUnique({
     where: {
-      email: safeEmail
+      email: normalizeEmail(email)
     }
   })
+}
 
-  if (existingUser) {
-    if (name) {
-      return prisma.user.update({
-        where: {
-          email: safeEmail
-        },
-        data: {
-          name
-        }
-      })
-    }
-
-    return existingUser
-  }
+export async function createUser(email: string, name?: string) {
+  const safeEmail = normalizeEmail(email)
+  const safeName = normalizeUserName(name)
+  const fallbackName = safeEmail.split('@')[0] || 'Пользователь'
 
   return prisma.user.create({
     data: {
       email: safeEmail,
-      name: name ?? fallbackName,
+      name: safeName ?? fallbackName,
       preferences: {
         create: {
           goal: defaultPreferences.goal,

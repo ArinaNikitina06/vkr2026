@@ -4,6 +4,7 @@ import Checkbox from '../components/ui/Checkbox'
 import Chip from '../components/ui/Chip'
 import Toast from '../components/ui/Toast'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
@@ -13,6 +14,7 @@ import {
   preferenceInterests,
   preferenceLevels,
 } from '../lib/data/preferences'
+import { normalizeUserName } from '../lib/userDisplay'
 import type { CourseLevel, UserPreferences } from '../lib/types'
 
 const profileStorageKey = 'eduflow.profile'
@@ -22,7 +24,12 @@ type UserProfile = {
   bio: string
 }
 
+function getProfileStorageKey(email?: string | null): string {
+  return email ? `${profileStorageKey}.${email}` : profileStorageKey
+}
+
 export default function Settings(): JSX.Element {
+  const router = useRouter()
   const { data: session } = useSession()
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [profile, setProfile] = useState<UserProfile>({ name: '', bio: '' })
@@ -32,11 +39,12 @@ export default function Settings(): JSX.Element {
   const selectedInterests = preferences.interests.length > 0 ? preferences.interests : defaultPreferences.interests
   const userEmail = session?.user?.email ?? ''
   const userPreferencesStorageKey = getUserPreferencesStorageKey(userEmail)
-  const registeredName = session?.user?.name ?? ''
+  const userProfileStorageKey = getProfileStorageKey(userEmail)
+  const registeredName = normalizeUserName(session?.user?.name) ?? ''
 
   useEffect(() => {
     const savedPreferences = window.localStorage.getItem(userPreferencesStorageKey)
-    const savedProfile = window.localStorage.getItem(profileStorageKey)
+    const savedProfile = window.localStorage.getItem(userProfileStorageKey)
 
     if (savedPreferences) {
       setPreferences(JSON.parse(savedPreferences))
@@ -47,7 +55,7 @@ export default function Settings(): JSX.Element {
     } else if (registeredName) {
       setProfile((current) => ({ ...current, name: registeredName }))
     }
-  }, [registeredName, userPreferencesStorageKey])
+  }, [registeredName, userPreferencesStorageKey, userProfileStorageKey])
 
   const toggleInterest = (interest: string) => {
     setPreferences((current) => {
@@ -90,8 +98,8 @@ export default function Settings(): JSX.Element {
 
     setPreferences(nextPreferences)
     window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
-    window.localStorage.setItem(profileStorageKey, JSON.stringify(profile))
-    setToast(isOnboarding ? 'Настройки сохранены, рекомендации обновлены' : 'Изменения сохранены')
+    window.localStorage.setItem(userProfileStorageKey, JSON.stringify(profile))
+    router.push('/')
   }
 
   return (

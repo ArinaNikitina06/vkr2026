@@ -2,13 +2,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { signOut, useSession } from 'next-auth/react'
 import { useState, type FormEvent } from 'react'
+import { getUserDisplayName } from '../lib/userDisplay'
 
 export default function Header(): JSX.Element {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [searchTerm, setSearchTerm] = useState('')
   const isAuthenticated = status === 'authenticated'
-  const userInitial = session?.user?.name?.[0] ?? session?.user?.email?.[0] ?? 'А'
+  const userDisplayName = isAuthenticated
+    ? getUserDisplayName(session?.user?.name, session?.user?.email)
+    : ''
+  const userInitial = userDisplayName[0] ?? 'А'
   const protectedHref = (href: string) => (
     isAuthenticated ? href : `/signin?callbackUrl=${encodeURIComponent(href)}`
   )
@@ -18,6 +22,11 @@ export default function Header(): JSX.Element {
     const query = searchTerm.trim()
     const path = query ? `/catalog?q=${encodeURIComponent(query)}` : '/catalog'
     router.push(protectedHref(path))
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
+    router.push('/')
   }
 
   return (
@@ -74,11 +83,11 @@ export default function Header(): JSX.Element {
                 <Link href="/settings" className="site-header__profile-button" aria-label="Открыть настройки профиля">
                   {userInitial.toUpperCase()}
                 </Link>
-                <span className="site-header__user">{session.user?.name ?? session.user?.email}</span>
+                <span className="site-header__user">{userDisplayName}</span>
                 <button
                   type="button"
                   className="site-header__auth-button"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={handleSignOut}
                 >
                   Выйти
                 </button>
