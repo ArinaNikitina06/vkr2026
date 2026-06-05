@@ -8,7 +8,6 @@ import RecommendationSection from '../../components/RecommendationSection'
 import RecommendationCourseGrid from '../../components/RecommendationCourseGrid'
 import SkeletonCard from '../../components/SkeletonCard'
 import Toast from '../../components/ui/Toast'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouteParam } from '../../hooks/useRouteParam'
 import { getCourseById } from '../../lib/data/courses'
@@ -32,8 +31,6 @@ export default function CoursePage(): JSX.Element {
 
   const includes = course?.includes ?? []
   const curriculum = course?.curriculum ?? []
-  const heroImage = course?.image ?? '/assets/course-design.svg'
-  const previewImage = course?.previewImage ?? heroImage
   const instructorImage = course?.instructorImage
 
   useEffect(() => {
@@ -124,39 +121,36 @@ export default function CoursePage(): JSX.Element {
       <Header />
       <main className="page-layout--white">
         <section className="hero-banner">
-          <div className="hero-overlay"></div>
-          <div className="card__media card__media--hero">
-            <Image src={heroImage} alt={course.title} fill priority sizes="100vw" className="card__image" unoptimized={heroImage.endsWith('.svg')} />
-          </div>
-
-          <div className="hero-content">
-            <div className="page-container page-container--full">
-              <div className="hero-grid">
-                <div className="hero-summary">
-                  <span className="course-category">{course.category}</span>
-                  <h1 className="course-hero-title">{course.title}</h1>
-                  <p className="hero-description">{course.description}</p>
-                  <div className="course-meta">
-                    <span className="course-meta__item">⭐ {course.rating} ({course.reviews} отзывов)</span>
-                    <span className="course-meta__item">🧑‍🎓 {(course.students / 1000).toFixed(0)}k студентов</span>
-                  </div>
+          <div className="page-container page-container--full">
+            <div className="hero-grid">
+              <div className="hero-summary">
+                <span className="course-category">{course.category}</span>
+                <h1 className="course-hero-title">{course.title}</h1>
+                <p className="hero-description">{course.description}</p>
+                <div className="course-meta">
+                  <span className="course-meta__item">Рейтинг {course.rating} ({course.reviews} отзывов)</span>
+                  <span className="course-meta__item">{(course.students / 1000).toFixed(0)}k студентов</span>
+                  <span className="course-meta__item">{course.duration}</span>
                 </div>
+              </div>
 
-                <div className="hero-panel">
-                  <div className="hero-panel__preview">
-                    <div className="course-panel-image-wrapper">
-                      <Image src={previewImage} alt={course.title} fill sizes="24rem" className="card__image course-panel-image" unoptimized={previewImage.endsWith('.svg')} />
-                    </div>
-                    <button
-                      className="button button--primary button--full"
-                      type="button"
-                      onClick={enrollCourse}
-                    >
-                      {enrolled ? 'Вы записаны' : 'Записаться'}
-                    </button>
+              <div className="hero-panel">
+                <div className="hero-panel__preview">
+                  <div className="course-panel-summary">
+                    <span className="course-panel-summary__label">Формат</span>
+                    <strong className="course-panel-summary__value">Онлайн-курс</strong>
+                    <span className="course-panel-summary__label">Стоимость</span>
+                    <strong className="course-panel-summary__value">{course.price ?? 'Бесплатно'}</strong>
                   </div>
-                  <CourseIncludes items={includes} />
+                  <button
+                    className="button button--primary button--full"
+                    type="button"
+                    onClick={enrollCourse}
+                  >
+                    {enrolled ? 'Вы записаны' : 'Записаться'}
+                  </button>
                 </div>
+                <CourseIncludes items={includes} />
               </div>
             </div>
           </div>
