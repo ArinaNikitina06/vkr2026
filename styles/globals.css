@@ -98,7 +98,7 @@ body {
 }
 
 .page-container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
 .page-container--full {
@@ -472,19 +472,27 @@ body {
 }
 
 .hero-banner {
-  @apply bg-gray-100 py-14;
+  @apply bg-gray-100 py-12 lg:py-14;
 }
 
 .hero-panel {
-  @apply self-start rounded-lg border border-gray-200 bg-white p-6 shadow-sm w-full md:w-96 flex flex-col gap-6;
+  @apply w-full max-w-sm justify-self-start overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm lg:justify-self-end;
+}
+
+.hero-panel__image {
+  @apply relative h-44 w-full bg-gray-200;
+}
+
+.hero-panel__image-content {
+  @apply h-full w-full object-cover;
 }
 
 .hero-panel__preview {
-  @apply border-b border-gray-200 pb-6;
+  @apply border-b border-gray-200 p-6;
 }
 
 .hero-grid {
-  @apply grid gap-8 lg:grid-cols-[1.5fr_0.9fr] items-center;
+  @apply mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem];
 }
 
 .hero-summary {
@@ -539,6 +547,10 @@ body {
   @apply grid gap-8 lg:grid-cols-[2fr_1fr];
 }
 
+.course-content {
+  @apply mx-auto max-w-4xl;
+}
+
 .course-main {
   @apply min-w-0;
 }
@@ -561,6 +573,10 @@ body {
 
 .course-includes {
   @apply space-y-3 text-sm text-gray-700;
+}
+
+.hero-panel > .course-includes {
+  @apply p-6 pt-0;
 }
 
 .course-includes__title {

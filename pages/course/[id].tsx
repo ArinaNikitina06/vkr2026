@@ -8,6 +8,7 @@ import RecommendationSection from '../../components/RecommendationSection'
 import RecommendationCourseGrid from '../../components/RecommendationCourseGrid'
 import SkeletonCard from '../../components/SkeletonCard'
 import Toast from '../../components/ui/Toast'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouteParam } from '../../hooks/useRouteParam'
 import { getCourseById } from '../../lib/data/courses'
@@ -31,6 +32,7 @@ export default function CoursePage(): JSX.Element {
 
   const includes = course?.includes ?? []
   const curriculum = course?.curriculum ?? []
+  const courseImage = course?.previewImage ?? course?.image ?? '/assets/course-design.svg'
   const instructorImage = course?.instructorImage
 
   useEffect(() => {
@@ -135,8 +137,22 @@ export default function CoursePage(): JSX.Element {
               </div>
 
               <div className="hero-panel">
+                <div className="hero-panel__image">
+                  <Image
+                    src={courseImage}
+                    alt={course.title}
+                    fill
+                    sizes="24rem"
+                    className="hero-panel__image-content"
+                    unoptimized={courseImage.endsWith('.svg')}
+                  />
+                </div>
                 <div className="hero-panel__preview">
                   <div className="course-panel-summary">
+                    <span className="course-panel-summary__label">Уровень</span>
+                    <strong className="course-panel-summary__value">{course.level}</strong>
+                    <span className="course-panel-summary__label">Длительность</span>
+                    <strong className="course-panel-summary__value">{course.duration}</strong>
                     <span className="course-panel-summary__label">Формат</span>
                     <strong className="course-panel-summary__value">Онлайн-курс</strong>
                     <span className="course-panel-summary__label">Стоимость</span>
@@ -157,7 +173,7 @@ export default function CoursePage(): JSX.Element {
         </section>
 
         <section className="page-container section">
-          <div className="course-layout">
+          <div className="course-content">
             <div className="course-main">
               <CourseInstructor name={course.instructor} image={instructorImage} />
 
@@ -168,34 +184,6 @@ export default function CoursePage(): JSX.Element {
 
               <CourseCurriculum sections={curriculum} />
             </div>
-
-            <aside className="course-sidebar">
-              <div className="info-box">
-                <h3 className="info-box__title">Информация о курсе</h3>
-                <div className="info-box__item">
-                  <div>
-                    <span className="info-box__label">Уровень</span>
-                    <p className="info-box__value">{course.level}</p>
-                  </div>
-                  <div>
-                    <span className="info-box__label">Длительность</span>
-                    <p className="info-box__value">{course.duration}</p>
-                  </div>
-                  <div>
-                    <span className="info-box__label">Студентов</span>
-                    <p className="info-box__value">{(course.students / 1000).toFixed(0)}k+</p>
-                  </div>
-                </div>
-
-                <button
-                  className="button button--primary button--full info-box__button"
-                  type="button"
-                  onClick={enrollCourse}
-                >
-                  {enrolled ? 'Курс добавлен' : 'Записаться на курс'}
-                </button>
-              </div>
-            </aside>
           </div>
         </section>
 
