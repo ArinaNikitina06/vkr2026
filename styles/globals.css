@@ -636,15 +636,15 @@ body {
 }
 
 .course-card-row {
-  @apply card card--course flex flex-col md:flex-row gap-4;
+  @apply card card--course grid gap-4 md:grid-cols-[12rem_minmax(0,1fr)_9rem];
 }
 
 .course-card-row__media {
-  @apply relative h-32 flex-shrink-0 overflow-hidden bg-gray-200 md:h-auto md:w-48;
+  @apply relative h-32 overflow-hidden bg-gray-200 md:h-auto;
 }
 
 .course-card-row__body {
-  @apply p-4 flex-1 flex flex-col justify-between;
+  @apply min-w-0 p-4 flex flex-col justify-between;
 }
 
 .course-card-row__title {
@@ -652,7 +652,11 @@ body {
 }
 
 .course-card-row__actions {
-  @apply p-6 flex items-center;
+  @apply flex items-center justify-start px-4 pb-5 md:justify-end md:p-4 md:pl-0;
+}
+
+.course-card-row__actions .button {
+  @apply w-full whitespace-nowrap text-center md:w-auto;
 }
 
 .course-progress {
@@ -672,7 +676,7 @@ body {
 }
 
 .home-learning {
-  @apply lg:col-span-2;
+  @apply lg:col-span-4;
 }
 
 .home-learning-layout {
