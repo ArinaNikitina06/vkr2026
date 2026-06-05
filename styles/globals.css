@@ -472,11 +472,11 @@ body {
 }
 
 .hero-banner {
-  @apply bg-gray-100 py-9 lg:py-10;
+  @apply bg-gray-100 py-7 lg:py-8;
 }
 
 .hero-panel {
-  @apply w-full max-w-sm justify-self-start overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md lg:translate-y-16 lg:justify-self-end;
+  @apply w-full max-w-sm justify-self-start overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md lg:translate-y-24 lg:justify-self-end;
 }
 
 .hero-panel__image {
@@ -548,7 +548,7 @@ body {
 }
 
 .course-content {
-  @apply mx-auto max-w-4xl pt-8 lg:pt-16;
+  @apply mx-auto max-w-4xl pt-8 lg:pt-24;
 }
 
 .course-main {

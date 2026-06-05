@@ -60,6 +60,7 @@ export function mapPrismaCourse(course: PrismaCourse): Course {
     previewImage: course.previewImage ?? undefined,
     instructor: course.instructor ?? undefined,
     instructorImage: course.instructorImage ?? undefined,
+    instructorDescription: undefined,
     tags: parseJsonList(course.tagsJson),
     duration: course.duration,
     students: course.students,

@@ -175,7 +175,11 @@ export default function CoursePage(): JSX.Element {
         <section className="page-container section">
           <div className="course-content">
             <div className="course-main">
-              <CourseInstructor name={course.instructor} image={instructorImage} />
+              <CourseInstructor
+                name={course.instructor}
+                image={instructorImage}
+                description={course.instructorDescription}
+              />
 
               <section className="course-section">
                 <h2 className="course-section__title">О курсе</h2>

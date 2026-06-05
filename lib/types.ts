@@ -24,6 +24,7 @@ export type Course = {
   previewImage?: string
   instructor?: string
   instructorImage?: string
+  instructorDescription?: string
   includes?: string[]
   curriculum?: CurriculumItem[]
   progress?: number
