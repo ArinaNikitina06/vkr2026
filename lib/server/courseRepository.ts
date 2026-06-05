@@ -114,28 +114,36 @@ export async function ensureCoursesSeeded() {
 }
 
 export async function courseExists(courseId: string): Promise<boolean> {
-  await ensureCoursesSeeded()
+  try {
+    await ensureCoursesSeeded()
 
-  const course = await prisma.course.findUnique({
-    where: {
-      id: courseId
-    },
-    select: {
-      id: true
-    }
-  })
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId
+      },
+      select: {
+        id: true
+      }
+    })
 
-  return Boolean(course)
+    return Boolean(course)
+  } catch {
+    return mockCourses.some((course) => course.id === courseId)
+  }
 }
 
 export async function getCoursesFromDatabase(): Promise<Course[]> {
-  await ensureCoursesSeeded()
+  try {
+    await ensureCoursesSeeded()
 
-  const dbCourses = await prisma.course.findMany({
-    orderBy: {
-      id: 'asc'
-    }
-  })
+    const dbCourses = await prisma.course.findMany({
+      orderBy: {
+        id: 'asc'
+      }
+    })
 
-  return dbCourses.map(mapPrismaCourse)
+    return dbCourses.map(mapPrismaCourse)
+  } catch {
+    return mockCourses
+  }
 }
