@@ -472,7 +472,7 @@ body {
 }
 
 .hero-banner {
-  @apply bg-gray-50 pt-7 lg:pt-8;
+  @apply bg-gray-100 pt-7 pb-0 lg:pt-8;
 }
 
 .hero-panel {
@@ -492,7 +492,7 @@ body {
 }
 
 .hero-grid {
-  @apply mx-auto grid max-w-5xl items-center gap-8 rounded-lg bg-gray-100 px-6 py-7 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8 lg:py-8;
+  @apply mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem];
 }
 
 .hero-summary {
