@@ -640,7 +640,7 @@ body {
 }
 
 .course-card-row__media {
-  @apply relative h-32 overflow-hidden bg-gray-200 md:h-auto;
+  @apply relative h-32 overflow-hidden bg-gray-200 md:h-full md:min-h-40;
 }
 
 .course-card-row__body {
@@ -676,7 +676,7 @@ body {
 }
 
 .home-learning {
-  @apply lg:col-span-4;
+  @apply lg:col-span-3;
 }
 
 .home-learning-layout {
