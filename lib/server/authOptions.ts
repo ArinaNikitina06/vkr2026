@@ -3,6 +3,16 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { getUserDisplayName, normalizeUserName } from '../userDisplay'
 import { createUser, getUserByEmail } from './userRepository'
 
+function createDemoUser(email: string, name?: string | null) {
+  const safeEmail = email.trim().toLowerCase()
+
+  return {
+    id: `demo-${safeEmail}`,
+    email: safeEmail,
+    name: getUserDisplayName(name, safeEmail)
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? 'demo-secret-change-before-production',
   pages: {
@@ -43,19 +53,24 @@ export const authOptions: NextAuthOptions = {
 
         const name = normalizeUserName(credentials?.name)
         const isRegisterMode = credentials?.mode === 'register'
-        const existingUser = await getUserByEmail(email)
-        const user = isRegisterMode
-          ? existingUser ? null : await createUser(email, name)
-          : existingUser
 
-        if (!user) {
-          return null
-        }
+        try {
+          const existingUser = await getUserByEmail(email)
+          const user = isRegisterMode
+            ? existingUser ? null : await createUser(email, name)
+            : existingUser
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: getUserDisplayName(user.name, user.email)
+          if (!user) {
+            return null
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: getUserDisplayName(user.name, user.email)
+          }
+        } catch {
+          return createDemoUser(email, name)
         }
       }
     })

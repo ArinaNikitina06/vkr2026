@@ -2,6 +2,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useState, type FormEvent } from 'react'
 import { createPendingOnboardingValue, pendingOnboardingStorageKey } from '../lib/data/preferences'
+import { getRegisteredUser, saveRegisteredUser } from '../lib/data/registeredUsers'
 import { normalizeUserName } from '../lib/userDisplay'
 
 function getQueryValue(value: string | string[] | undefined): string {
@@ -26,18 +27,19 @@ export default function SignIn(): JSX.Element {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
+    const savedUser = getRegisteredUser(email)
+    const normalizedName = normalizeUserName(name)
 
     const credentials = {
       email,
       password,
       mode: isRegisterMode ? 'register' : 'login',
+      name: isRegisterMode ? normalizedName : savedUser?.name,
       callbackUrl,
       redirect: false
     }
 
-    const result = await signIn('credentials', isRegisterMode
-      ? { ...credentials, name: normalizeUserName(name) }
-      : credentials)
+    const result = await signIn('credentials', credentials)
 
     if (result?.error) {
       setError(isRegisterMode ? 'Не удалось зарегистрироваться. Проверьте данные.' : 'Не удалось войти. Проверьте email и пароль.')
@@ -45,6 +47,7 @@ export default function SignIn(): JSX.Element {
     }
 
     if (isRegisterMode) {
+      saveRegisteredUser(email, normalizedName ?? email)
       window.localStorage.setItem(pendingOnboardingStorageKey, createPendingOnboardingValue(email))
       router.push('/?onboarding=1')
       return
