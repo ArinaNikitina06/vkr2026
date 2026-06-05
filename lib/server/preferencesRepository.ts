@@ -16,46 +16,40 @@ function parseInterests(value: string | null | undefined): string[] {
 }
 
 export async function getStoredPreferences(userEmail: string): Promise<UserPreferences> {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: userEmail
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: userEmail
+      }
+    })
+
+    if (!user) {
+      return defaultPreferences
     }
-  })
 
-  if (!user) {
-    return defaultPreferences
-  }
+    const preferences = await prisma.userPreference.findUnique({
+      where: {
+        userId: user.id
+      }
+    })
 
-  const preferences = await prisma.userPreference.findUnique({
-    where: {
-      userId: user.id
+    if (!preferences) {
+      return defaultPreferences
     }
-  })
 
-  if (!preferences) {
+    return {
+      goal: preferences.goal,
+      interests: parseInterests(preferences.interestsJson),
+      level: preferences.level as CourseLevel,
+      consent: preferences.consent,
+      onboarded: preferences.onboarded
+    }
+  } catch {
     return defaultPreferences
-  }
-
-  return {
-    goal: preferences.goal,
-    interests: parseInterests(preferences.interestsJson),
-    level: preferences.level as CourseLevel,
-    consent: preferences.consent,
-    onboarded: preferences.onboarded
   }
 }
 
 export async function saveStoredPreferences(userEmail: string, input: Partial<UserPreferences>): Promise<UserPreferences> {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: userEmail
-    }
-  })
-
-  if (!user) {
-    return defaultPreferences
-  }
-
   const nextPreferences: UserPreferences = {
     ...defaultPreferences,
     ...input,
@@ -63,32 +57,46 @@ export async function saveStoredPreferences(userEmail: string, input: Partial<Us
     onboarded: true
   }
 
-  const preferences = await prisma.userPreference.upsert({
-    where: {
-      userId: user.id
-    },
-    update: {
-      goal: nextPreferences.goal,
-      interestsJson: JSON.stringify(nextPreferences.interests),
-      level: nextPreferences.level,
-      consent: nextPreferences.consent,
-      onboarded: nextPreferences.onboarded
-    },
-    create: {
-      userId: user.id,
-      goal: nextPreferences.goal,
-      interestsJson: JSON.stringify(nextPreferences.interests),
-      level: nextPreferences.level,
-      consent: nextPreferences.consent,
-      onboarded: nextPreferences.onboarded
-    }
-  })
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: userEmail
+      }
+    })
 
-  return {
-    goal: preferences.goal,
-    interests: parseInterests(preferences.interestsJson),
-    level: preferences.level as CourseLevel,
-    consent: preferences.consent,
-    onboarded: preferences.onboarded
+    if (!user) {
+      return nextPreferences
+    }
+
+    const preferences = await prisma.userPreference.upsert({
+      where: {
+        userId: user.id
+      },
+      update: {
+        goal: nextPreferences.goal,
+        interestsJson: JSON.stringify(nextPreferences.interests),
+        level: nextPreferences.level,
+        consent: nextPreferences.consent,
+        onboarded: nextPreferences.onboarded
+      },
+      create: {
+        userId: user.id,
+        goal: nextPreferences.goal,
+        interestsJson: JSON.stringify(nextPreferences.interests),
+        level: nextPreferences.level,
+        consent: nextPreferences.consent,
+        onboarded: nextPreferences.onboarded
+      }
+    })
+
+    return {
+      goal: preferences.goal,
+      interests: parseInterests(preferences.interestsJson),
+      level: preferences.level as CourseLevel,
+      consent: preferences.consent,
+      onboarded: preferences.onboarded
+    }
+  } catch {
+    return nextPreferences
   }
 }

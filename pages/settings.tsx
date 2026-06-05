@@ -78,6 +78,10 @@ export default function Settings(): JSX.Element {
     }
 
     setError('')
+    setPreferences(nextPreferences)
+    window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
+    window.localStorage.setItem(userProfileStorageKey, JSON.stringify(profile))
+    router.push('/')
 
     try {
       const response = await fetch('/api/user/preferences', {
@@ -92,14 +96,8 @@ export default function Settings(): JSX.Element {
         throw new Error('Preferences request failed')
       }
     } catch {
-      setError('Не удалось сохранить настройки. Попробуйте ещё раз.')
       return
     }
-
-    setPreferences(nextPreferences)
-    window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
-    window.localStorage.setItem(userProfileStorageKey, JSON.stringify(profile))
-    router.push('/')
   }
 
   return (
