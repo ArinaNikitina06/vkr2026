@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "db:init": "sqlite3 prisma/dev.db \".read prisma/migrations/20260530194200_init/migration.sql\"",
+    "db:init": "sqlite3 prisma/dev.db \".read prisma/migrations/20260530194200_init/migration.sql\" \".read prisma/migrations/20260608170000_add_user_password/migration.sql\"",
     "postinstall": "prisma generate"
   },
   "dependencies": {

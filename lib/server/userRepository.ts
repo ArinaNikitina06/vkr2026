@@ -14,7 +14,7 @@ export async function getUserByEmail(email: string) {
   })
 }
 
-export async function createUser(email: string, name?: string) {
+export async function createUser(email: string, name: string | undefined, passwordHash: string) {
   const safeEmail = normalizeEmail(email)
   const safeName = normalizeUserName(name)
   const fallbackName = safeEmail.split('@')[0] || 'Пользователь'
@@ -22,6 +22,7 @@ export async function createUser(email: string, name?: string) {
   return prisma.user.create({
     data: {
       email: safeEmail,
+      passwordHash,
       name: safeName ?? fallbackName,
       preferences: {
         create: {
@@ -32,6 +33,20 @@ export async function createUser(email: string, name?: string) {
           onboarded: defaultPreferences.onboarded
         }
       }
+    }
+  })
+}
+
+export async function setUserPassword(userId: string, passwordHash: string, name?: string) {
+  const safeName = normalizeUserName(name)
+
+  return prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      passwordHash,
+      ...(safeName ? { name: safeName } : {})
     }
   })
 }

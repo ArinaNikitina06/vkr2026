@@ -1,17 +1,8 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { getUserDisplayName, normalizeUserName } from '../userDisplay'
-import { createUser, getUserByEmail } from './userRepository'
-
-function createDemoUser(email: string, name?: string | null) {
-  const safeEmail = email.trim().toLowerCase()
-
-  return {
-    id: `demo-${safeEmail}`,
-    email: safeEmail,
-    name: getUserDisplayName(name, safeEmail)
-  }
-}
+import { hashPassword, verifyPassword } from './passwords'
+import { createUser, getUserByEmail, setUserPassword } from './userRepository'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? 'demo-secret-change-before-production',
@@ -46,8 +37,9 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const email = credentials?.email?.trim()
+        const password = credentials?.password?.trim()
 
-        if (!email) {
+        if (!email || !password) {
           return null
         }
 
@@ -57,10 +49,14 @@ export const authOptions: NextAuthOptions = {
         try {
           const existingUser = await getUserByEmail(email)
           const user = isRegisterMode
-            ? existingUser ? null : await createUser(email, name)
+            ? existingUser
+              ? existingUser.passwordHash
+                ? null
+                : await setUserPassword(existingUser.id, hashPassword(password), name)
+              : await createUser(email, name, hashPassword(password))
             : existingUser
 
-          if (!user) {
+          if (!user || (!isRegisterMode && (!user.passwordHash || !verifyPassword(password, user.passwordHash)))) {
             return null
           }
 
@@ -70,7 +66,7 @@ export const authOptions: NextAuthOptions = {
             name: getUserDisplayName(user.name, user.email)
           }
         } catch {
-          return createDemoUser(email, name)
+          return null
         }
       }
     })
