@@ -2,11 +2,12 @@ import Header from '../components/Header'
 import Button from '../components/ui/Button'
 import Checkbox from '../components/ui/Checkbox'
 import Chip from '../components/ui/Chip'
-import Toast from '../components/ui/Toast'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 import {
   defaultPreferences,
   getUserPreferencesStorageKey,
@@ -14,48 +15,35 @@ import {
   preferenceInterests,
   preferenceLevels,
 } from '../lib/data/preferences'
+import { defaultUserProfile, getProfileStorageKey, type UserProfile } from '../lib/data/profile'
+import { saveUserPreferences } from '../lib/recommendations/client'
 import { normalizeUserName } from '../lib/userDisplay'
 import type { CourseLevel, UserPreferences } from '../lib/types'
-
-const profileStorageKey = 'eduflow.profile'
-
-type UserProfile = {
-  name: string
-  bio: string
-}
-
-function getProfileStorageKey(email?: string | null): string {
-  return email ? `${profileStorageKey}.${email}` : profileStorageKey
-}
 
 export default function Settings(): JSX.Element {
   const router = useRouter()
   const { data: session } = useSession()
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
-  const [profile, setProfile] = useState<UserProfile>({ name: '', bio: '' })
-  const [toast, setToast] = useState('')
-  const [error, setError] = useState('')
+  const [profile, setProfile] = useState<UserProfile>(defaultUserProfile)
   const isOnboarding = !preferences.onboarded
   const selectedInterests = preferences.interests.length > 0 ? preferences.interests : defaultPreferences.interests
   const userEmail = session?.user?.email ?? ''
   const userPreferencesStorageKey = getUserPreferencesStorageKey(userEmail)
   const userProfileStorageKey = getProfileStorageKey(userEmail)
+  const userPreferencesStorage = useLocalStorage<UserPreferences>(userPreferencesStorageKey, defaultPreferences)
+  const userProfileStorage = useLocalStorage<UserProfile>(userProfileStorageKey, defaultUserProfile)
   const registeredName = normalizeUserName(session?.user?.name) ?? ''
 
   useEffect(() => {
-    const savedPreferences = window.localStorage.getItem(userPreferencesStorageKey)
-    const savedProfile = window.localStorage.getItem(userProfileStorageKey)
+    const savedPreferences = userPreferencesStorage.read()
+    const savedProfile = userProfileStorage.read()
 
-    if (savedPreferences) {
-      setPreferences(JSON.parse(savedPreferences))
-    }
-
-    if (savedProfile) {
-      setProfile(JSON.parse(savedProfile))
-    } else if (registeredName) {
+    setPreferences(savedPreferences)
+    setProfile(savedProfile)
+    if (!savedProfile.name && registeredName) {
       setProfile((current) => ({ ...current, name: registeredName }))
     }
-  }, [registeredName, userPreferencesStorageKey, userProfileStorageKey])
+  }, [registeredName, userPreferencesStorage, userProfileStorage])
 
   const toggleInterest = (interest: string) => {
     setPreferences((current) => {
@@ -77,27 +65,18 @@ export default function Settings(): JSX.Element {
       onboarded: true
     }
 
-    setError('')
     setPreferences(nextPreferences)
-    window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
-    window.localStorage.setItem(userProfileStorageKey, JSON.stringify(profile))
-    router.push('/')
+    userPreferencesStorage.save(nextPreferences)
+    userProfileStorage.save(profile)
 
     try {
-      const response = await fetch('/api/user/preferences', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(nextPreferences)
-      })
-
-      if (!response.ok) {
-        throw new Error('Preferences request failed')
-      }
+      await saveUserPreferences(nextPreferences)
     } catch {
-      return
+      toast.info('Настройки сохранены локально')
     }
+
+    toast.success('Настройки сохранены')
+    router.push('/')
   }
 
   return (
@@ -115,18 +94,6 @@ export default function Settings(): JSX.Element {
               </p>
             </div>
           </div>
-
-          {toast && (
-            <div className="settings-alert">
-              <Toast tone="success">{toast}</Toast>
-            </div>
-          )}
-
-          {error && (
-            <div className="settings-alert">
-              <Toast tone="error">{error}</Toast>
-            </div>
-          )}
 
           <div className="settings-grid">
             <aside className="settings-sidebar" aria-label="Разделы настроек">

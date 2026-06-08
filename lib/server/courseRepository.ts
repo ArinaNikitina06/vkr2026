@@ -1,4 +1,5 @@
 import { courses as mockCourses } from '../data/courses'
+import { parseJsonArray } from '../json'
 import type { Course, CourseCategory, CourseLevel, CurriculumItem } from '../types'
 import { prisma } from './prisma'
 
@@ -24,29 +25,13 @@ type CourseSeedData = {
 }
 
 function parseJsonList(value: string | null | undefined): string[] {
-  if (!value) {
-    return []
-  }
-
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+  return parseJsonArray<string>(value, [])
 }
 
 function parseCurriculum(value: string | null | undefined): CurriculumItem[] | undefined {
-  if (!value) {
-    return undefined
-  }
+  const parsedCurriculum = parseJsonArray<CurriculumItem>(value, [])
 
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed : undefined
-  } catch {
-    return undefined
-  }
+  return parsedCurriculum.length > 0 ? parsedCurriculum : undefined
 }
 
 export function mapPrismaCourse(course: PrismaCourse): Course {

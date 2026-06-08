@@ -3,17 +3,9 @@ import { useRouter } from 'next/router'
 import { useState, type FormEvent } from 'react'
 import { createPendingOnboardingValue, pendingOnboardingStorageKey } from '../lib/data/preferences'
 import { getRegisteredUser, saveRegisteredUser } from '../lib/data/registeredUsers'
+import { getSafeRelativePath } from '../lib/queryParams'
+import { writeLocalStorageText } from '../lib/storage'
 import { normalizeUserName } from '../lib/userDisplay'
-
-function getQueryValue(value: string | string[] | undefined): string {
-  const queryValue = Array.isArray(value) ? value[0] : value
-
-  if (!queryValue || queryValue.startsWith('http')) {
-    return '/'
-  }
-
-  return queryValue.startsWith('/') ? queryValue : '/'
-}
 
 export default function SignIn(): JSX.Element {
   const router = useRouter()
@@ -22,7 +14,7 @@ export default function SignIn(): JSX.Element {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const callbackUrl = getQueryValue(router.query.callbackUrl)
+  const callbackUrl = getSafeRelativePath(router.query.callbackUrl)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -48,7 +40,7 @@ export default function SignIn(): JSX.Element {
 
     if (isRegisterMode) {
       saveRegisteredUser(email, normalizedName ?? email)
-      window.localStorage.setItem(pendingOnboardingStorageKey, createPendingOnboardingValue(email))
+      writeLocalStorageText(pendingOnboardingStorageKey, createPendingOnboardingValue(email))
       router.push('/?onboarding=1')
       return
     }

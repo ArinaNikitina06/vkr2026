@@ -1,18 +1,10 @@
 import { defaultPreferences } from '../data/preferences'
+import { parseJsonArray } from '../json'
 import type { CourseLevel, UserPreferences } from '../types'
 import { prisma } from './prisma'
 
 function parseInterests(value: string | null | undefined): string[] {
-  if (!value) {
-    return defaultPreferences.interests
-  }
-
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed : defaultPreferences.interests
-  } catch {
-    return defaultPreferences.interests
-  }
+  return parseJsonArray<string>(value, defaultPreferences.interests)
 }
 
 export async function getStoredPreferences(userEmail: string): Promise<UserPreferences> {

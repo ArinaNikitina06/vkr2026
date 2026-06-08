@@ -244,8 +244,6 @@ export const courses: Course[] = [
   }
 ]
 
-export const recommendedCourses = courses.slice(0, 4)
-
 export const ongoingCourses: LearningCourse[] = [
   {
     ...courses[1],

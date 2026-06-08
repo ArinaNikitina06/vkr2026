@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { defaultPreferences } from '../../lib/data/preferences'
+import { getQueryValue, parseCommaSeparatedList } from '../../lib/queryParams'
 import { getSimilarCourses, rankCourses } from '../../lib/recommendations/rank'
 import { getCoursesFromDatabase } from '../../lib/server/courseRepository'
 import type { CourseLevel, RecommendationItem, UserPreferences } from '../../lib/types'
@@ -13,24 +14,10 @@ type RecommendationsResponse = {
   sections: RecommendationSectionResponse[]
 }
 
-function getQueryValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value
-}
-
-function parseList(value: string | string[] | undefined): string[] {
-  const rawValue = getQueryValue(value)
-
-  if (!rawValue) {
-    return []
-  }
-
-  return rawValue.split(',').map((item) => item.trim()).filter(Boolean)
-}
-
 function parsePreferences(request: NextApiRequest): UserPreferences {
   const goal = getQueryValue(request.query.goal) ?? defaultPreferences.goal
   const level = (getQueryValue(request.query.level) ?? defaultPreferences.level) as CourseLevel
-  const interests = parseList(request.query.interests)
+  const interests = parseCommaSeparatedList(request.query.interests)
 
   return {
     ...defaultPreferences,
@@ -53,9 +40,9 @@ export default async function handler(
   }
 
   const context = getQueryValue(request.query.context) ?? 'home'
-  const hiddenCourseIds = parseList(request.query.hidden)
-  const likedCourseIds = parseList(request.query.liked)
-  const bookmarkedCourseIds = parseList(request.query.bookmarked)
+  const hiddenCourseIds = parseCommaSeparatedList(request.query.hidden)
+  const likedCourseIds = parseCommaSeparatedList(request.query.liked)
+  const bookmarkedCourseIds = parseCommaSeparatedList(request.query.bookmarked)
   const courses = await getCoursesFromDatabase()
 
   if (context === 'course') {

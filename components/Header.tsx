@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { signOut, useSession } from 'next-auth/react'
 import { useState, type FormEvent } from 'react'
 import { getUserDisplayName } from '../lib/userDisplay'
+import SearchInput from './ui/SearchInput'
 
 export default function Header(): JSX.Element {
   const router = useRouter()
@@ -57,14 +58,14 @@ export default function Header(): JSX.Element {
 
           <div className="site-header__actions">
             <form onSubmit={handleSearch} className="site-header__search">
-              <label className="sr-only" htmlFor="header-search">Поиск курсов</label>
-              <input
+              <SearchInput
                 id="header-search"
+                label="Поиск курсов"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                type="search"
                 placeholder="Поиск курсов..."
-                className="site-header__search-input"
+                inputClassName="site-header__search-input"
+                wrapperClassName="site-header__search-field"
               />
               <button type="submit" className="site-header__search-button" aria-label="Поиск">
                 <svg className="site-header__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

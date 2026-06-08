@@ -6,13 +6,13 @@ import LearningCourseList from '../components/LearningCourseList'
 import RecommendationSection from '../components/RecommendationSection'
 import RecommendationCourseGrid from '../components/RecommendationCourseGrid'
 import SkeletonCard from '../components/SkeletonCard'
-import Toast from '../components/ui/Toast'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import PreferencesModal from '../components/PreferencesModal'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
-import { useStringListStorage } from '../hooks/useStringListStorage'
+import { toast } from 'react-toastify'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 import { courses, ongoingCourses } from '../lib/data/courses'
 import {
   defaultPreferences,
@@ -22,21 +22,22 @@ import {
   likedCoursesStorageKey,
   pendingOnboardingStorageKey,
 } from '../lib/data/preferences'
+import {
+  fetchHomeRecommendations,
+  saveUserPreferences,
+  sendCourseInteraction
+} from '../lib/recommendations/client'
+import { readLocalStorageText, removeLocalStorageValue } from '../lib/storage'
 import { getUserDisplayName } from '../lib/userDisplay'
 import type { RecommendationItem, UserPreferences } from '../lib/types'
 
-type RecommendationsResponse = {
-  sections: {
-    title: string
-    items: RecommendationItem[]
-  }[]
-}
+const emptyCourseIds: string[] = []
 
 export default function Home(): JSX.Element {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const hiddenCourseStorage = useStringListStorage(hiddenCoursesStorageKey)
-  const likedCourseStorage = useStringListStorage(likedCoursesStorageKey)
+  const hiddenCourseStorage = useLocalStorage<string[]>(hiddenCoursesStorageKey, emptyCourseIds)
+  const likedCourseStorage = useLocalStorage<string[]>(likedCoursesStorageKey, emptyCourseIds)
   const isAuthenticated = status === 'authenticated'
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences)
   const [hiddenCourseIds, setHiddenCourseIds] = useState<string[]>([])
@@ -45,9 +46,9 @@ export default function Home(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true)
   const [recommendationsError, setRecommendationsError] = useState(false)
   const [shouldShowOnboardingModal, setShouldShowOnboardingModal] = useState(false)
-  const [toast, setToast] = useState<string>('')
   const userName = isAuthenticated ? getUserDisplayName(session?.user?.name, session?.user?.email) : ''
   const userPreferencesStorageKey = getUserPreferencesStorageKey(session?.user?.email)
+  const userPreferencesStorage = useLocalStorage<UserPreferences>(userPreferencesStorageKey, defaultPreferences)
   const greeting = isAuthenticated && userName
     ? `Добрый день, ${userName}`
     : 'Добрый день'
@@ -57,24 +58,14 @@ export default function Home(): JSX.Element {
     setRecommendationsError(false)
 
     try {
-      const params = new URLSearchParams({
-        goal: nextPreferences.goal,
-        level: nextPreferences.level,
-        interests: nextPreferences.interests.join(','),
-        hidden: nextHiddenCourseIds.join(','),
-        liked: likedCourseStorage.read().join(',')
-      })
+      const nextRecommendations = await fetchHomeRecommendations(
+        nextPreferences,
+        nextHiddenCourseIds,
+        likedCourseStorage.read()
+      )
 
-      const response = await fetch(`/api/recommendations?${params.toString()}`)
-
-      if (!response.ok) {
-        throw new Error('Recommendations request failed')
-      }
-
-      const data = await response.json() as RecommendationsResponse
-
-      setPersonalRecommendations(data.sections.find((section) => section.title === 'Для вас')?.items ?? [])
-      setInterestRecommendations(data.sections.find((section) => section.title === 'На основе ваших интересов')?.items ?? [])
+      setPersonalRecommendations(nextRecommendations.personalRecommendations)
+      setInterestRecommendations(nextRecommendations.interestRecommendations)
     } catch {
       setRecommendationsError(true)
     } finally {
@@ -92,10 +83,9 @@ export default function Home(): JSX.Element {
       return
     }
 
-    const savedPreferences = window.localStorage.getItem(userPreferencesStorageKey)
-    const nextPreferences = savedPreferences ? JSON.parse(savedPreferences) : defaultPreferences
+    const nextPreferences = userPreferencesStorage.read()
     const nextHiddenCourseIds = hiddenCourseStorage.read()
-    const pendingOnboardingValue = window.localStorage.getItem(pendingOnboardingStorageKey)
+    const pendingOnboardingValue = readLocalStorageText(pendingOnboardingStorageKey)
     const isPendingOnboarding = isPendingOnboardingForUser(pendingOnboardingValue, session?.user?.email)
     const isRegistrationOnboarding = router.query.onboarding === '1'
     const shouldOpenOnboarding = (isRegistrationOnboarding || isPendingOnboarding) && !nextPreferences.onboarded
@@ -103,62 +93,60 @@ export default function Home(): JSX.Element {
     setPreferences(nextPreferences)
     setHiddenCourseIds(nextHiddenCourseIds)
     setShouldShowOnboardingModal(shouldOpenOnboarding)
-    window.localStorage.removeItem(pendingOnboardingStorageKey)
+    removeLocalStorageValue(pendingOnboardingStorageKey)
     if (nextPreferences.onboarded) {
       loadRecommendations(nextPreferences, nextHiddenCourseIds)
     } else {
       setIsLoading(false)
     }
-  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, router, status, userPreferencesStorageKey])
+  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, router, session?.user?.email, status, userPreferencesStorage])
 
   const handleSavePreferences = async (nextPreferences: UserPreferences) => {
     setPreferences(nextPreferences)
-    window.localStorage.setItem(userPreferencesStorageKey, JSON.stringify(nextPreferences))
-    window.localStorage.removeItem(pendingOnboardingStorageKey)
+    userPreferencesStorage.save(nextPreferences)
+    removeLocalStorageValue(pendingOnboardingStorageKey)
     setShouldShowOnboardingModal(false)
     router.replace('/', undefined, { shallow: true })
-    setToast('Настройки сохранены, рекомендации обновлены')
+    toast.success('Настройки сохранены, рекомендации обновлены')
 
     try {
-      await fetch('/api/user/preferences', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(nextPreferences)
-      })
+      await saveUserPreferences(nextPreferences)
     } catch {
-      setToast('Настройки сохранены локально')
+      toast.info('Настройки сохранены локально')
     }
 
     loadRecommendations(nextPreferences, hiddenCourseIds)
   }
 
-  const sendInteraction = async (courseId: string, type: 'like' | 'hide') => {
-    await fetch('/api/interactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ courseId, type })
-    })
-  }
-
-  const handleHide = (courseId: string) => {
+  const handleHide = async (courseId: string) => {
     const nextHiddenIds = Array.from(new Set([...hiddenCourseIds, courseId]))
+
     setHiddenCourseIds(nextHiddenIds)
     hiddenCourseStorage.save(nextHiddenIds)
-    sendInteraction(courseId, 'hide')
-    loadRecommendations(preferences, nextHiddenIds)
-    setToast('Курс скрыт из рекомендаций')
+
+    try {
+      await sendCourseInteraction(courseId, 'hide')
+    } catch {
+      toast.info('Действие сохранено локально')
+    }
+
+    await loadRecommendations(preferences, nextHiddenIds)
+    toast.success('Курс скрыт из рекомендаций')
   }
 
-  const handleLike = (courseId: string) => {
+  const handleLike = async (courseId: string) => {
     const nextLikedIds = Array.from(new Set([...likedCourseStorage.read(), courseId]))
+
     likedCourseStorage.save(nextLikedIds)
-    sendInteraction(courseId, 'like')
-    loadRecommendations(preferences, hiddenCourseIds)
-    setToast('Отметка учтена для будущих рекомендаций')
+
+    try {
+      await sendCourseInteraction(courseId, 'like')
+    } catch {
+      toast.info('Действие сохранено локально')
+    }
+
+    await loadRecommendations(preferences, hiddenCourseIds)
+    toast.success('Отметка учтена для будущих рекомендаций')
   }
 
   if (!isAuthenticated) {
@@ -210,12 +198,6 @@ export default function Home(): JSX.Element {
             </div>
           )}
         </section>
-
-        {toast && (
-          <section className="page-container section--compact">
-            <Toast tone="success">{toast}</Toast>
-          </section>
-        )}
 
         <section className="page-container section">
           <div className="home-learning-layout">

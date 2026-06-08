@@ -2,10 +2,17 @@ import Header from '../components/Header'
 import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import Chip from '../components/ui/Chip'
+import SearchInput from '../components/ui/SearchInput'
 import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
+import {
+  buildCatalogPath,
+  normalizeCatalogCategory,
+  normalizeCatalogLevel,
+  normalizeCatalogSort
+} from '../lib/catalogQuery'
 import {
   catalogLevels,
   defaultCatalogSort,
@@ -24,36 +31,18 @@ export default function Catalog(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   useEffect(() => {
-    if (typeof q === 'string') {
-      setSearchTerm(q)
-    } else if (typeof search === 'string') {
-      setSearchTerm(search)
-    }
-
-    if (typeof tag === 'string') {
-      setSearchTerm(tag)
-    }
-
-    if (typeof category === 'string') {
-      const normalizedCategory = catalogCategories.find((item) => (
-        item.toLowerCase() === category.toLowerCase() ||
-        item.toUpperCase() === category.toUpperCase()
-      ))
-
-      setActiveCategory(normalizedCategory ?? 'Все')
-    }
-
-    if (typeof level === 'string') {
-      const normalizedLevel = catalogLevels.find((item) => item.toLowerCase() === level.toLowerCase())
-
-      setActiveLevel(normalizedLevel ?? 'Все')
-    }
-
-    if (typeof sort === 'string') {
-      const normalizedSort = sortOptions.find((item) => item.value === sort)
-
-      setActiveSort(normalizedSort?.value ?? defaultCatalogSort)
-    }
+    setSearchTerm(
+      typeof tag === 'string'
+        ? tag
+        : typeof q === 'string'
+          ? q
+          : typeof search === 'string'
+            ? search
+            : ''
+    )
+    setActiveCategory(normalizeCatalogCategory(typeof category === 'string' ? category : undefined))
+    setActiveLevel(normalizeCatalogLevel(typeof level === 'string' ? level : undefined))
+    setActiveSort(normalizeCatalogSort(typeof sort === 'string' ? sort : undefined))
   }, [category, level, q, search, sort, tag])
 
   const updateFilters = (nextFilters: {
@@ -66,31 +55,17 @@ export default function Catalog(): JSX.Element {
     const nextLevel = nextFilters.level ?? activeLevel
     const nextSort = nextFilters.sort ?? activeSort
     const nextSearch = nextFilters.search ?? searchTerm
-    const params = new URLSearchParams()
 
     setActiveCategory(nextCategory)
     setActiveLevel(nextLevel)
     setActiveSort(nextSort)
     setSearchTerm(nextSearch)
-
-    if (nextSearch.trim()) {
-      params.set('q', nextSearch.trim())
-    }
-
-    if (nextCategory !== 'Все') {
-      params.set('category', nextCategory)
-    }
-
-    if (nextLevel !== 'Все') {
-      params.set('level', nextLevel)
-    }
-
-    if (nextSort !== defaultCatalogSort) {
-      params.set('sort', nextSort)
-    }
-
-    const query = params.toString()
-    router.push(query ? `/catalog?${query}` : '/catalog')
+    router.push(buildCatalogPath({
+      category: nextCategory,
+      level: nextLevel,
+      search: nextSearch,
+      sort: nextSort
+    }))
   }
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -118,14 +93,14 @@ export default function Catalog(): JSX.Element {
         <section className="page-container section section--compact">
           <div className="search-panel">
             <form onSubmit={handleSearch} className="search-form">
-              <label className="sr-only" htmlFor="catalog-search">Поиск курсов</label>
-              <input
+              <SearchInput
                 id="catalog-search"
+                label="Поиск курсов"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                type="text"
                 placeholder="Поиск курсов, навыков или преподавателей"
-                className="search-input"
+                inputClassName="search-input"
+                wrapperClassName="search-form__input"
               />
               <button type="submit" className="search-button" aria-label="Поиск">
                 <svg className="search-button__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

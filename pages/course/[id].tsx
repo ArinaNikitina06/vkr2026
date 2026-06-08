@@ -7,11 +7,12 @@ import ErrorState from '../../components/ErrorState'
 import RecommendationSection from '../../components/RecommendationSection'
 import RecommendationCourseGrid from '../../components/RecommendationCourseGrid'
 import SkeletonCard from '../../components/SkeletonCard'
-import Toast from '../../components/ui/Toast'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { useRouteParam } from '../../hooks/useRouteParam'
 import { getCourseById } from '../../lib/data/courses'
+import { sendCourseInteraction } from '../../lib/recommendations/client'
 import type { RecommendationItem } from '../../lib/types'
 
 type RecommendationsResponse = {
@@ -57,13 +58,7 @@ export default function CoursePage(): JSX.Element {
       .catch(() => setSimilarCoursesError(true))
       .finally(() => setIsSimilarCoursesLoading(false))
 
-    fetch('/api/interactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ courseId, type: 'view' })
-    })
+    void sendCourseInteraction(courseId, 'view').catch(() => undefined)
   }, [course, courseId])
 
   if (!courseId) {
@@ -116,6 +111,7 @@ export default function CoursePage(): JSX.Element {
     }
 
     setEnrolled(true)
+    toast.success('Запись на курс сохранена в прототипе')
   }
 
   return (
@@ -191,15 +187,9 @@ export default function CoursePage(): JSX.Element {
           </div>
         </section>
 
-        {enrolled && (
-          <section className="page-container section--compact">
-            <Toast tone="success">Запись на курс сохранена в прототипе</Toast>
-          </section>
-        )}
-
         {error && (
           <section className="page-container section--compact">
-            <Toast tone="error">{error}</Toast>
+            <p className="ui-toast ui-toast--error" role="alert">{error}</p>
           </section>
         )}
 

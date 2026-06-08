@@ -29,7 +29,6 @@ export const preferencesStorageKey = 'eduflow.preferences'
 export const pendingOnboardingStorageKey = 'eduflow.pendingOnboarding'
 export const hiddenCoursesStorageKey = 'eduflow.hiddenCourses'
 export const likedCoursesStorageKey = 'eduflow.likedCourses'
-export const bookmarkedCoursesStorageKey = 'eduflow.bookmarkedCourses'
 
 export function getUserPreferencesStorageKey(email?: string | null): string {
   return email ? `${preferencesStorageKey}.${email}` : preferencesStorageKey

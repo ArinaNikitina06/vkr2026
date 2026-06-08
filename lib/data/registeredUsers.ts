@@ -1,4 +1,5 @@
 import { normalizeUserName } from '../userDisplay'
+import { readLocalStorageValue, writeLocalStorageValue } from '../storage'
 
 const registeredUsersStorageKey = 'eduflow.registeredUsers'
 
@@ -11,28 +12,24 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
+function isRegisteredUser(value: unknown): value is RegisteredUser {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const user = value as Partial<RegisteredUser>
+
+  return typeof user.email === 'string' && typeof user.name === 'string'
+}
+
 function readRegisteredUsers(): RegisteredUser[] {
-  if (typeof window === 'undefined') {
-    return []
-  }
+  const parsedUsers = readLocalStorageValue<RegisteredUser[] | unknown>(registeredUsersStorageKey, [])
 
-  const savedUsers = window.localStorage.getItem(registeredUsersStorageKey)
-
-  if (!savedUsers) {
-    return []
-  }
-
-  try {
-    const parsedUsers = JSON.parse(savedUsers)
-
-    return Array.isArray(parsedUsers) ? parsedUsers : []
-  } catch {
-    return []
-  }
+  return Array.isArray(parsedUsers) ? parsedUsers.filter(isRegisteredUser) : []
 }
 
 function saveRegisteredUsers(users: RegisteredUser[]): void {
-  window.localStorage.setItem(registeredUsersStorageKey, JSON.stringify(users))
+  writeLocalStorageValue(registeredUsersStorageKey, users)
 }
 
 export function getRegisteredUser(email: string): RegisteredUser | undefined {
