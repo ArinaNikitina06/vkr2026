@@ -3,10 +3,10 @@ import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import Chip from '../components/ui/Chip'
 import SearchInput from '../components/ui/SearchInput'
+import type { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/router'
-import { catalogCategories, courses, type CatalogCategory } from '../lib/data/courses'
 import {
   buildCatalogPath,
   normalizeCatalogCategory,
@@ -21,8 +21,29 @@ import {
   type CatalogLevel,
   type CatalogSort
 } from '../lib/catalogFilters'
+import { getCatalogCategoriesFromDatabase, getCoursesFromDatabase } from '../lib/server/courseRepository'
+import type { CatalogCategory, Course } from '../lib/types'
 
-export default function Catalog(): JSX.Element {
+type CatalogProps = {
+  catalogCategories: CatalogCategory[]
+  courses: Course[]
+}
+
+export const getServerSideProps: GetServerSideProps<CatalogProps> = async () => {
+  const [courses, catalogCategories] = await Promise.all([
+    getCoursesFromDatabase(),
+    getCatalogCategoriesFromDatabase()
+  ])
+
+  return {
+    props: {
+      catalogCategories,
+      courses
+    }
+  }
+}
+
+export default function Catalog({ catalogCategories, courses }: CatalogProps): JSX.Element {
   const router = useRouter()
   const { category, level, q, search, sort, tag } = router.query
   const [activeCategory, setActiveCategory] = useState<CatalogCategory>('Все')
@@ -40,10 +61,13 @@ export default function Catalog(): JSX.Element {
             ? search
             : ''
     )
-    setActiveCategory(normalizeCatalogCategory(typeof category === 'string' ? category : undefined))
+    setActiveCategory(normalizeCatalogCategory(
+      typeof category === 'string' ? category : undefined,
+      catalogCategories
+    ))
     setActiveLevel(normalizeCatalogLevel(typeof level === 'string' ? level : undefined))
     setActiveSort(normalizeCatalogSort(typeof sort === 'string' ? sort : undefined))
-  }, [category, level, q, search, sort, tag])
+  }, [catalogCategories, category, level, q, search, sort, tag])
 
   const updateFilters = (nextFilters: {
     category?: CatalogCategory

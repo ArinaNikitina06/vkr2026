@@ -47,7 +47,7 @@ export async function enrollUser(userEmail: string, courseId: string) {
     return null
   }
 
-  return prisma.enrollment.upsert({
+  const enrollment = await prisma.enrollment.upsert({
     where: {
       userId_courseId: {
         userId: user.id,
@@ -63,4 +63,21 @@ export async function enrollUser(userEmail: string, courseId: string) {
       status: 'enrolled'
     }
   })
+
+  await prisma.progress.upsert({
+    where: {
+      userId_courseId: {
+        userId: user.id,
+        courseId
+      }
+    },
+    update: {},
+    create: {
+      userId: user.id,
+      courseId,
+      percent: 0
+    }
+  })
+
+  return enrollment
 }

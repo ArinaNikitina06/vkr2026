@@ -46,7 +46,13 @@ export default async function handler(
   const courses = await getCoursesFromDatabase()
 
   if (context === 'course') {
-    const course = courses.find((item) => item.id === getQueryValue(request.query.courseId)) ?? courses[0]
+    const courseId = getQueryValue(request.query.courseId)
+    const course = courses.find((item) => item.id === courseId)
+
+    if (!course) {
+      response.status(404).json({ message: 'Course not found' })
+      return
+    }
 
     response.status(200).json({
       sections: [

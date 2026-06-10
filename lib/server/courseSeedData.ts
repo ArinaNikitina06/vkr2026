@@ -1,6 +1,6 @@
-import type { Course, LearningCourse } from '../types'
+import type { Course } from '../types'
 
-export const courses: Course[] = [
+export const seedCourses: Course[] = [
   {
     id: '1',
     image: '/assets/course-design.svg',
@@ -243,58 +243,3 @@ export const courses: Course[] = [
     ]
   }
 ]
-
-export const ongoingCourses: LearningCourse[] = [
-  {
-    ...courses[1],
-    id: 'ongoing-1',
-    title: 'Продвинутые паттерны React',
-    description: 'Паттерны и лучшие практики для профессиональной разработки.',
-    progress: 65
-  }
-]
-
-export const myLearningCourses = {
-  inProgress: [
-    ongoingCourses[0],
-    {
-      ...courses[0],
-      id: 'ongoing-2',
-      title: 'Дизайн-системы 101',
-      description: 'Как создавать и поддерживать масштабируемые дизайн-системы.',
-      level: 'Средний',
-      tags: ['Дизайн', 'Средний'],
-      progress: 12
-    },
-    {
-      ...courses[2],
-      id: 'ongoing-3',
-      description: 'Научитесь управлять продуктовыми командами.',
-      progress: 38
-    }
-  ],
-  saved: [
-    {
-      ...courses[0],
-      id: 'saved-1'
-    },
-    {
-      ...courses[1],
-      id: 'saved-2'
-    }
-  ],
-  completed: [
-    {
-      ...courses[4],
-      id: 'completed-1'
-    }
-  ]
-} satisfies Record<'inProgress' | 'saved' | 'completed', LearningCourse[]>
-
-export const catalogCategories = ['Все', 'Разработка', 'Дизайн', 'Бизнес', 'Маркетинг', 'Данные'] as const
-
-export type CatalogCategory = (typeof catalogCategories)[number]
-
-export function getCourseById(id: string): Course | undefined {
-  return courses.find((course) => course.id === id)
-}

@@ -1,9 +1,11 @@
-import { courses as mockCourses } from '../data/courses'
 import { parseJsonArray } from '../json'
-import type { Course, CourseCategory, CourseLevel, CurriculumItem } from '../types'
+import type { CatalogCategory, Course, CourseCategory, CourseLevel, CurriculumItem, LearningCourse } from '../types'
+import { seedCourses } from './courseSeedData'
 import { prisma } from './prisma'
 
 type PrismaCourse = Awaited<ReturnType<typeof prisma.course.findMany>>[number]
+let didEnsureCourses = false
+
 type CourseSeedData = {
   image: string
   category: CourseCategory
@@ -13,6 +15,7 @@ type CourseSeedData = {
   previewImage?: string
   instructor?: string
   instructorImage?: string
+  instructorDescription?: string
   tagsJson: string
   duration: string
   students: number
@@ -45,7 +48,7 @@ export function mapPrismaCourse(course: PrismaCourse): Course {
     previewImage: course.previewImage ?? undefined,
     instructor: course.instructor ?? undefined,
     instructorImage: course.instructorImage ?? undefined,
-    instructorDescription: undefined,
+    instructorDescription: course.instructorDescription ?? undefined,
     tags: parseJsonList(course.tagsJson),
     duration: course.duration,
     students: course.students,
@@ -68,6 +71,7 @@ function createCourseSeedData(course: Course): CourseSeedData {
     previewImage: course.previewImage,
     instructor: course.instructor,
     instructorImage: course.instructorImage,
+    instructorDescription: course.instructorDescription,
     tagsJson: JSON.stringify(course.tags),
     duration: course.duration,
     students: course.students,
@@ -81,8 +85,12 @@ function createCourseSeedData(course: Course): CourseSeedData {
 }
 
 export async function ensureCoursesSeeded() {
+  if (didEnsureCourses) {
+    return
+  }
+
   await Promise.all(
-    mockCourses.map((course) => {
+    seedCourses.map((course) => {
       const courseData = createCourseSeedData(course)
 
       return prisma.course.upsert({
@@ -97,39 +105,132 @@ export async function ensureCoursesSeeded() {
       })
     })
   )
+
+  didEnsureCourses = true
 }
 
 export async function courseExists(courseId: string): Promise<boolean> {
-  try {
-    await ensureCoursesSeeded()
+  await ensureCoursesSeeded()
 
-    const course = await prisma.course.findUnique({
-      where: {
-        id: courseId
-      },
-      select: {
-        id: true
-      }
-    })
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId
+    },
+    select: {
+      id: true
+    }
+  })
 
-    return Boolean(course)
-  } catch {
-    return mockCourses.some((course) => course.id === courseId)
-  }
+  return Boolean(course)
 }
 
 export async function getCoursesFromDatabase(): Promise<Course[]> {
-  try {
-    await ensureCoursesSeeded()
+  await ensureCoursesSeeded()
 
-    const dbCourses = await prisma.course.findMany({
+  const dbCourses = await prisma.course.findMany({
+    orderBy: {
+      id: 'asc'
+    }
+  })
+
+  return dbCourses.map(mapPrismaCourse)
+}
+
+export async function getCourseByIdFromDatabase(courseId: string): Promise<Course | null> {
+  await ensureCoursesSeeded()
+
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId
+    }
+  })
+
+  return course ? mapPrismaCourse(course) : null
+}
+
+function formatCatalogCategory(category: string): CatalogCategory {
+  const lowerCategory = category.toLowerCase()
+
+  return lowerCategory.charAt(0).toUpperCase() + lowerCategory.slice(1)
+}
+
+export async function getCatalogCategoriesFromDatabase(): Promise<CatalogCategory[]> {
+  await ensureCoursesSeeded()
+
+  const categories = await prisma.course.findMany({
+    distinct: ['category'],
+    orderBy: {
+      category: 'asc'
+    },
+    select: {
+      category: true
+    }
+  })
+
+  return ['Все', ...categories.map((item) => formatCatalogCategory(item.category))]
+}
+
+export type LearningCourseCollections = {
+  inProgress: LearningCourse[]
+  saved: Course[]
+  completed: Course[]
+}
+
+export async function getLearningCoursesForUser(userEmail?: string | null): Promise<LearningCourseCollections> {
+  if (!userEmail) {
+    return {
+      inProgress: [],
+      saved: [],
+      completed: []
+    }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: userEmail
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return {
+      inProgress: [],
+      saved: [],
+      completed: []
+    }
+  }
+
+  const [enrollments, progressItems] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: {
+        userId: user.id
+      },
+      include: {
+        course: true
+      },
       orderBy: {
-        id: 'asc'
+        createdAt: 'desc'
+      }
+    }),
+    prisma.progress.findMany({
+      where: {
+        userId: user.id
       }
     })
+  ])
 
-    return dbCourses.map(mapPrismaCourse)
-  } catch {
-    return mockCourses
+  const progressByCourseId = new Map(
+    progressItems.map((progress) => [progress.courseId, progress.percent])
+  )
+
+  return {
+    inProgress: enrollments.map((enrollment) => ({
+      ...mapPrismaCourse(enrollment.course),
+      progress: progressByCourseId.get(enrollment.courseId) ?? 0
+    })),
+    saved: [],
+    completed: []
   }
 }

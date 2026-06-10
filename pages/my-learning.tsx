@@ -1,18 +1,35 @@
 import Header from '../components/Header'
 import CourseGrid from '../components/CourseGrid'
+import EmptyState from '../components/EmptyState'
 import LearningCourseList from '../components/LearningCourseList'
 import LearningTabs, { type LearningTabId } from '../components/LearningTabs'
+import type { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import { useState } from 'react'
-import { myLearningCourses } from '../lib/data/courses'
+import { authOptions } from '../lib/server/authOptions'
+import {
+  getLearningCoursesForUser,
+  type LearningCourseCollections
+} from '../lib/server/courseRepository'
 
-export default function MyLearning(): JSX.Element {
-  const [activeTab, setActiveTab] = useState<LearningTabId>('inProgress')
+type MyLearningProps = {
+  tabData: LearningCourseCollections
+}
 
-  const tabData = {
-    inProgress: myLearningCourses.inProgress,
-    saved: myLearningCourses.saved,
-    completed: myLearningCourses.completed
+export const getServerSideProps: GetServerSideProps<MyLearningProps> = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+  const tabData = await getLearningCoursesForUser(session?.user?.email)
+
+  return {
+    props: {
+      tabData
+    }
   }
+}
+
+export default function MyLearning({ tabData }: MyLearningProps): JSX.Element {
+  const [activeTab, setActiveTab] = useState<LearningTabId>('inProgress')
+  const activeCourses = tabData[activeTab]
 
   return (
     <>
@@ -28,10 +45,15 @@ export default function MyLearning(): JSX.Element {
         </section>
 
         <section className="page-container section">
-          {activeTab === 'inProgress' ? (
+          {activeCourses.length === 0 ? (
+            <EmptyState
+              title="Здесь пока нет курсов"
+              description="Запишитесь на курс, чтобы он появился в этом разделе."
+            />
+          ) : activeTab === 'inProgress' ? (
             <LearningCourseList courses={tabData.inProgress} />
           ) : (
-            <CourseGrid courses={tabData[activeTab]} />
+            <CourseGrid courses={activeCourses} />
           )}
         </section>
       </main>

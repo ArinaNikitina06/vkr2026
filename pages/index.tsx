@@ -6,14 +6,15 @@ import LearningCourseList from '../components/LearningCourseList'
 import RecommendationSection from '../components/RecommendationSection'
 import RecommendationCourseGrid from '../components/RecommendationCourseGrid'
 import SkeletonCard from '../components/SkeletonCard'
+import type { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import PreferencesModal from '../components/PreferencesModal'
+import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useLocalStorage } from '../hooks/useLocalStorage'
-import { courses, ongoingCourses } from '../lib/data/courses'
 import {
   defaultPreferences,
   getUserPreferencesStorageKey,
@@ -27,13 +28,35 @@ import {
   saveUserPreferences,
   sendCourseInteraction
 } from '../lib/recommendations/client'
+import { authOptions } from '../lib/server/authOptions'
+import { getCoursesFromDatabase, getLearningCoursesForUser } from '../lib/server/courseRepository'
 import { readLocalStorageText, removeLocalStorageValue } from '../lib/storage'
 import { getUserDisplayName } from '../lib/userDisplay'
-import type { RecommendationItem, UserPreferences } from '../lib/types'
+import type { Course, LearningCourse, RecommendationItem, UserPreferences } from '../lib/types'
 
 const emptyCourseIds: string[] = []
 
-export default function Home(): JSX.Element {
+type HomeProps = {
+  courses: Course[]
+  learningCourses: LearningCourse[]
+}
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+  const [courses, learningCourses] = await Promise.all([
+    getCoursesFromDatabase(),
+    getLearningCoursesForUser(session?.user?.email)
+  ])
+
+  return {
+    props: {
+      courses,
+      learningCourses: learningCourses.inProgress
+    }
+  }
+}
+
+export default function Home({ courses, learningCourses }: HomeProps): JSX.Element {
   const router = useRouter()
   const { data: session, status } = useSession()
   const hiddenCourseStorage = useLocalStorage<string[]>(hiddenCoursesStorageKey, emptyCourseIds)
@@ -211,7 +234,7 @@ export default function Home(): JSX.Element {
             </div>
 
             <div className="home-learning">
-              <LearningCourseList courses={ongoingCourses} />
+              <LearningCourseList courses={learningCourses} />
             </div>
           </div>
         </section>

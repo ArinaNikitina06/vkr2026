@@ -29,6 +29,7 @@ model Course {
   previewImage    String?
   instructor      String?
   instructorImage String?
+  instructorDescription String?
   tagsJson        String
   duration        String
   students        Int

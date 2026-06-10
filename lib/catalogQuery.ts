@@ -1,4 +1,3 @@
-import { catalogCategories, type CatalogCategory } from './data/courses'
 import {
   catalogLevels,
   defaultCatalogSort,
@@ -6,6 +5,7 @@ import {
   type CatalogLevel,
   type CatalogSort
 } from './catalogFilters'
+import type { CatalogCategory } from './types'
 
 export type CatalogQueryState = {
   category: CatalogCategory
@@ -14,7 +14,10 @@ export type CatalogQueryState = {
   sort: CatalogSort
 }
 
-export function normalizeCatalogCategory(value?: string): CatalogCategory {
+export function normalizeCatalogCategory(
+  value?: string,
+  catalogCategories: CatalogCategory[] = ['Все']
+): CatalogCategory {
   if (!value) {
     return 'Все'
   }
@@ -62,4 +65,3 @@ export function buildCatalogPath(filters: CatalogQueryState): string {
 
   return query ? `/catalog?${query}` : '/catalog'
 }
-

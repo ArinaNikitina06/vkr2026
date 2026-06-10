@@ -7,13 +7,13 @@ import ErrorState from '../../components/ErrorState'
 import RecommendationSection from '../../components/RecommendationSection'
 import RecommendationCourseGrid from '../../components/RecommendationCourseGrid'
 import SkeletonCard from '../../components/SkeletonCard'
+import type { GetServerSideProps } from 'next'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { useRouteParam } from '../../hooks/useRouteParam'
-import { getCourseById } from '../../lib/data/courses'
 import { sendCourseInteraction } from '../../lib/recommendations/client'
-import type { RecommendationItem } from '../../lib/types'
+import { getCourseByIdFromDatabase } from '../../lib/server/courseRepository'
+import type { Course, RecommendationItem } from '../../lib/types'
 
 type RecommendationsResponse = {
   sections: {
@@ -22,13 +22,26 @@ type RecommendationsResponse = {
   }[]
 }
 
-export default function CoursePage(): JSX.Element {
-  const courseId = useRouteParam('id')
+type CoursePageProps = {
+  course: Course | null
+}
+
+export const getServerSideProps: GetServerSideProps<CoursePageProps> = async (context) => {
+  const courseId = typeof context.params?.id === 'string' ? context.params.id : ''
+  const course = courseId ? await getCourseByIdFromDatabase(courseId) : null
+
+  return {
+    props: {
+      course
+    }
+  }
+}
+
+export default function CoursePage({ course }: CoursePageProps): JSX.Element {
   const [enrolled, setEnrolled] = useState(false)
   const [error, setError] = useState('')
   const [similarCoursesError, setSimilarCoursesError] = useState(false)
   const [isSimilarCoursesLoading, setIsSimilarCoursesLoading] = useState(true)
-  const course = courseId ? getCourseById(courseId) : undefined
   const [similarCourses, setSimilarCourses] = useState<RecommendationItem[]>([])
 
   const includes = course?.includes ?? []
@@ -37,14 +50,14 @@ export default function CoursePage(): JSX.Element {
   const instructorImage = course?.instructorImage
 
   useEffect(() => {
-    if (!courseId || !course) {
+    if (!course) {
       return
     }
 
     setIsSimilarCoursesLoading(true)
     setSimilarCoursesError(false)
 
-    fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(courseId)}`)
+    fetch(`/api/recommendations?context=course&courseId=${encodeURIComponent(course.id)}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Similar courses request failed')
@@ -58,21 +71,8 @@ export default function CoursePage(): JSX.Element {
       .catch(() => setSimilarCoursesError(true))
       .finally(() => setIsSimilarCoursesLoading(false))
 
-    void sendCourseInteraction(courseId, 'view').catch(() => undefined)
-  }, [course, courseId])
-
-  if (!courseId) {
-    return (
-      <>
-        <Header />
-        <main className="page-layout">
-          <section className="page-container section">
-            <SkeletonCard count={1} />
-          </section>
-        </main>
-      </>
-    )
-  }
+    void sendCourseInteraction(course.id, 'view').catch(() => undefined)
+  }, [course])
 
   if (!course) {
     return (

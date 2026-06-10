@@ -2,6 +2,8 @@ export type CourseLevel = 'Начальный' | 'Средний' | 'Продв�
 
 export type CourseCategory = 'ДИЗАЙН' | 'РАЗРАБОТКА' | 'БИЗНЕС' | 'ДАННЫЕ' | 'МАРКЕТИНГ'
 
+export type CatalogCategory = 'Все' | string
+
 export type CurriculumItem = {
   title: string
   sections: number

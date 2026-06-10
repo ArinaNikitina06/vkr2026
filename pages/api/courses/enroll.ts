@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getCoursesFromDatabase } from '../../../lib/server/courseRepository'
+import { courseExists } from '../../../lib/server/courseRepository'
 import { getSessionUserId } from '../../../lib/server/apiSession'
 import { enrollUser } from '../../../lib/server/interactionsRepository'
 
@@ -27,13 +27,18 @@ export default async function handler(
   }
 
   const courseId = String(request.body?.courseId ?? '')
-  const courses = await getCoursesFromDatabase()
-  const course = courses.find((item) => item.id === courseId) ?? courses[0]
-  await enrollUser(userEmail, course.id)
+  const isExistingCourse = await courseExists(courseId)
+
+  if (!isExistingCourse) {
+    response.status(404).json({ message: 'Course not found' })
+    return
+  }
+
+  await enrollUser(userEmail, courseId)
 
   response.status(200).json({
     ok: true,
-    courseId: course.id,
+    courseId,
     status: 'enrolled'
   })
 }

@@ -1,5 +1,4 @@
-import type { CatalogCategory } from './data/courses'
-import type { Course, CourseLevel } from './types'
+import type { CatalogCategory, Course, CourseLevel } from './types'
 
 export type CatalogLevel = 'Все' | CourseLevel
 export type CatalogSort = 'popular' | 'rating' | 'price-asc' | 'duration'
