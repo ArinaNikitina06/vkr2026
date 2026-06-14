@@ -176,6 +176,7 @@ export default function Catalog({ catalogCategories, courses }: CatalogProps): J
         </section>
 
         <section className="page-container section">
+          <h2 className="sr-only">Список курсов</h2>
           {filteredCourses.length > 0 ? (
             <CourseGrid courses={filteredCourses} />
           ) : (

@@ -4,7 +4,8 @@ type SkeletonCardProps = {
 
 export default function SkeletonCard({ count = 1 }: SkeletonCardProps): JSX.Element {
   return (
-    <div className="grid-cards" aria-label="Загрузка курсов">
+    <div className="grid-cards" role="status" aria-live="polite">
+      <span className="sr-only">Загрузка курсов</span>
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="skeleton-card">
           <div className="skeleton-card__media"></div>

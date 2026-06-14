@@ -5,7 +5,7 @@ type CourseIncludesProps = {
 export default function CourseIncludes({ items }: CourseIncludesProps): JSX.Element {
   return (
     <div className="course-includes">
-      <h3 className="course-includes__title">Этот курс включает:</h3>
+      <h2 className="course-includes__title">Этот курс включает:</h2>
       {items.map((item) => (
         <div key={item} className="course-includes__item">
           <svg className="course-includes__icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
