@@ -171,7 +171,7 @@
 }
 
 .home-learning {
-  @apply lg:col-span-3;
+  @apply lg:col-span-4;
 }
 
 .home-learning-layout {

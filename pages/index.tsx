@@ -234,7 +234,15 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
             </div>
 
             <div className="home-learning">
-              <LearningCourseList courses={learningCourses} />
+              {learningCourses.length > 0 ? (
+                <LearningCourseList courses={learningCourses} />
+              ) : (
+                <EmptyState
+                  title="Пока нет начатых курсов"
+                  description="Запишитесь на курс, чтобы продолжить обучение с главной страницы."
+                  action={<Link href="/catalog" className="button button--secondary">Открыть каталог</Link>}
+                />
+              )}
             </div>
           </div>
         </section>
