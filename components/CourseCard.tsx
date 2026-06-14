@@ -50,7 +50,11 @@ export default function CourseCard({
   ))
 
   const handleLike = () => {
-    setLiked((value) => !value)
+    if (liked) {
+      return
+    }
+
+    setLiked(true)
     onLike?.(id)
   }
 
@@ -69,7 +73,7 @@ export default function CourseCard({
           type="button"
           className={`card__action ${liked ? 'card__action--active' : ''}`}
           aria-pressed={liked}
-          aria-label={`${liked ? 'Убрать отметку нравится' : 'Отметить как понравившийся'}: ${title}`}
+          aria-label={`${liked ? 'Курс уже отмечен как понравившийся' : 'Отметить как понравившийся'}: ${title}`}
           onClick={handleLike}
         >
           Нравится

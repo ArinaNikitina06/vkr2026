@@ -48,10 +48,6 @@ export default function SignIn(): JSX.Element {
     router.push(callbackUrl)
   }
 
-  const handleSocialSignIn = () => {
-    setError('Вход через GitHub не подключен в MVP. Используйте email и пароль.')
-  }
-
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="signin-title">
@@ -111,17 +107,6 @@ export default function SignIn(): JSX.Element {
 
           <button type="submit" className="auth-submit">{isRegisterMode ? 'Зарегистрироваться' : 'Войти'}</button>
         </form>
-
-        <div className="auth-divider">
-          <span></span>
-          <p>или продолжить с</p>
-          <span></span>
-        </div>
-
-        <button type="button" className="auth-social" onClick={handleSocialSignIn}>
-          <span aria-hidden="true">⌘</span>
-          GitHub
-        </button>
 
         <p className="auth-register">
           {isRegisterMode ? 'Уже есть аккаунт?' : 'Нет аккаунта?'}{' '}
