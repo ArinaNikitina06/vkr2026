@@ -11,8 +11,10 @@ function hasCommonTags(course: Course, sourceCourse: Course): boolean {
 }
 
 function getSignalCourses(courses: Course[], courseIds: string[]): Course[] {
+  const coursesById = new Map(courses.map((course) => [course.id, course]))
+
   return courseIds
-    .map((courseId) => courses.find((course) => course.id === courseId))
+    .map((courseId) => coursesById.get(courseId))
     .filter((course): course is Course => Boolean(course))
 }
 
@@ -37,13 +39,15 @@ export function rankCourses(
   preferences: UserPreferences,
   signals: RecommendationSignals = {}
 ): RecommendationItem[] {
-  const hiddenCourseIds = signals.hiddenCourseIds ?? []
+  const hiddenCourseIds = new Set(signals.hiddenCourseIds ?? [])
   const likedCourses = getSignalCourses(courses, signals.likedCourseIds ?? [])
   const bookmarkedCourses = getSignalCourses(courses, signals.bookmarkedCourseIds ?? [])
+  const likedCourseIds = new Set(likedCourses.map((course) => course.id))
+  const bookmarkedCourseIds = new Set(bookmarkedCourses.map((course) => course.id))
   const signalCourses = [...likedCourses, ...bookmarkedCourses]
 
   return courses
-    .filter((course) => !hiddenCourseIds.includes(course.id))
+    .filter((course) => !hiddenCourseIds.has(course.id))
     .map((course) => {
       const reasons: string[] = []
       let score = course.rating
@@ -63,12 +67,12 @@ export function rankCourses(
         reasons.push('Подходит вашему уровню')
       }
 
-      if (likedCourses.some((likedCourse) => likedCourse.id === course.id)) {
+      if (likedCourseIds.has(course.id)) {
         score += 1
         reasons.push('Вы отметили этот курс как полезный')
       }
 
-      if (bookmarkedCourses.some((bookmarkedCourse) => bookmarkedCourse.id === course.id)) {
+      if (bookmarkedCourseIds.has(course.id)) {
         score += 1
         reasons.push('Курс сохранен в избранном')
       }

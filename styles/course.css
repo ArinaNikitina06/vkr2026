@@ -1,0 +1,184 @@
+.hero-banner {
+  @apply relative bg-gray-100 pb-0 pt-7 lg:pt-8;
+  z-index: 0;
+}
+
+.hero-panel {
+  @apply w-full max-w-sm justify-self-start overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md lg:translate-y-24 lg:justify-self-end;
+}
+
+.hero-panel__image {
+  @apply relative h-44 w-full bg-gray-200;
+}
+
+.hero-panel__image-content {
+  @apply h-full w-full object-cover;
+}
+
+.hero-panel__preview {
+  @apply border-b border-gray-200 p-6;
+}
+
+.hero-grid {
+  @apply mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem];
+}
+
+.hero-summary {
+  @apply flex flex-col gap-4;
+}
+
+.hero-description {
+  @apply max-w-3xl text-lg leading-relaxed text-gray-700;
+}
+
+.hero-summary .section-title {
+  @apply text-gray-900;
+}
+
+.course-hero-title {
+  @apply text-4xl font-bold text-gray-950;
+}
+
+.course-category {
+  @apply text-sm font-semibold uppercase tracking-wide text-gray-500;
+}
+
+.course-meta {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.course-meta__item {
+  @apply rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200;
+}
+
+.course-meta__favorite {
+  @apply inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors duration-200 hover:bg-white/20;
+}
+
+.course-meta__favorite--active {
+  @apply bg-red-500 text-white;
+}
+
+.course-panel-summary {
+  @apply mb-5 grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4;
+}
+
+.course-panel-summary__label {
+  @apply text-xs font-semibold uppercase text-gray-500;
+}
+
+.course-panel-summary__value {
+  @apply text-sm font-semibold text-gray-900;
+}
+
+.course-layout {
+  @apply grid gap-8 lg:grid-cols-[2fr_1fr];
+}
+
+.course-content {
+  @apply mx-auto max-w-4xl pt-8 lg:pt-24;
+}
+
+.course-main {
+  @apply min-w-0;
+}
+
+.course-sidebar {
+  @apply lg:col-span-1;
+}
+
+.course-section {
+  @apply mb-12 pb-12;
+}
+
+.course-section__title {
+  @apply mb-6 text-2xl font-bold text-gray-900;
+}
+
+.course-section__text {
+  @apply text-lg leading-relaxed text-gray-700;
+}
+
+.course-includes {
+  @apply space-y-3 text-sm text-gray-700;
+}
+
+.hero-panel > .course-includes {
+  @apply p-6 pt-0;
+}
+
+.course-includes__title {
+  @apply mb-3 font-semibold;
+}
+
+.course-includes__item {
+  @apply flex items-start gap-2;
+}
+
+.course-includes__icon {
+  @apply mt-0.5 h-5 w-5 flex-shrink-0 text-green-600;
+}
+
+.course-instructor {
+  @apply flex items-center gap-4;
+}
+
+.course-instructor__avatar {
+  @apply rounded-full;
+}
+
+.course-instructor__name {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.course-instructor__description {
+  @apply text-gray-600;
+}
+
+.course-curriculum {
+  @apply space-y-3;
+}
+
+.course-curriculum__item {
+  @apply flex h-full flex-col overflow-hidden rounded-lg bg-white p-4 shadow-sm transition-shadow hover:shadow-md;
+}
+
+.course-curriculum__button {
+  @apply flex w-full items-center justify-between text-left;
+}
+
+.course-curriculum__title {
+  @apply font-semibold text-gray-900;
+}
+
+.course-curriculum__meta {
+  @apply text-sm text-gray-600;
+}
+
+.course-curriculum__icon {
+  @apply h-5 w-5 text-gray-400;
+}
+
+.info-box {
+  @apply sticky top-4 rounded-lg bg-gray-50 p-6;
+}
+
+.info-box__title {
+  @apply mb-4 font-semibold text-gray-900;
+}
+
+.info-box__item {
+  @apply space-y-4 text-sm;
+}
+
+.info-box__label {
+  @apply text-gray-600;
+}
+
+.info-box__value {
+  @apply font-medium text-gray-900;
+}
+
+.info-box__button {
+  @apply mt-6;
+}

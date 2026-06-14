@@ -1,0 +1,143 @@
+.settings-grid {
+  @apply grid grid-cols-1 gap-8 lg:grid-cols-4;
+}
+
+.settings-page-header {
+  @apply mb-8 lg:ml-[calc(25%+1rem)];
+}
+
+.settings-alert {
+  @apply mb-6;
+}
+
+.settings-sidebar {
+  @apply flex flex-col gap-1;
+}
+
+.settings-nav-item {
+  @apply rounded-md px-4 py-3 text-left text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.settings-nav-item--active {
+  @apply bg-gray-100 text-gray-900;
+}
+
+.settings-content {
+  @apply space-y-8 lg:col-span-3;
+}
+
+.settings-card {
+  @apply rounded-lg border border-gray-200 bg-white p-6 shadow-sm md:p-8;
+}
+
+.settings-card__header {
+  @apply mb-6;
+}
+
+.settings-header {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.settings-row {
+  @apply mb-6 flex flex-wrap items-center gap-4;
+}
+
+.settings-summary {
+  @apply flex items-center justify-between;
+}
+
+.settings-form-group {
+  @apply mb-4;
+}
+
+.settings-label {
+  @apply mb-2 block text-sm font-semibold text-gray-900;
+}
+
+.settings-input {
+  @apply w-full rounded-lg border border-gray-300 bg-white px-4 py-2 focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.settings-input--readonly {
+  @apply cursor-not-allowed bg-gray-50 text-gray-500;
+}
+
+.settings-textarea {
+  @apply min-h-20 resize-none;
+}
+
+.settings-subtitle {
+  @apply text-base font-semibold text-gray-900;
+}
+
+.settings-personalization {
+  @apply mt-5 flex flex-col gap-4 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between;
+}
+
+.settings-actions {
+  @apply flex justify-end;
+}
+
+.settings-button {
+  @apply rounded-lg bg-gray-900 px-6 py-2 font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.profile-avatar {
+  @apply h-16 w-16 rounded-full object-cover;
+}
+
+.profile-button {
+  @apply rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50;
+}
+
+.profile-tag {
+  @apply cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200;
+}
+
+.preferences-modal {
+  @apply fixed inset-0 z-[100] flex items-center justify-center px-4 py-8;
+}
+
+.preferences-modal__backdrop {
+  @apply pointer-events-none absolute inset-0 z-0 bg-slate-950/50 backdrop-blur-sm;
+}
+
+.preferences-modal__panel {
+  @apply relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-gray-200 bg-white p-6 shadow-2xl sm:p-8;
+}
+
+.preferences-modal__title {
+  @apply mb-2 text-2xl font-bold text-gray-900;
+}
+
+.preferences-modal__subtitle {
+  @apply mb-6 text-gray-600;
+}
+
+.preferences-modal__consent {
+  @apply mt-4 flex items-center gap-3 text-sm font-medium text-gray-800 lg:mt-0;
+}
+
+.preferences-modal__consent input {
+  @apply h-5 w-5 rounded border-gray-300;
+}
+
+.preferences-modal__selected-interests {
+  @apply mt-3 flex flex-wrap gap-2;
+}
+
+.preferences-modal__selected-interest {
+  @apply inline-flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500;
+}
+
+.preferences-modal__selected-interest span {
+  @apply text-gray-400;
+}
+
+.preferences-modal__error {
+  @apply mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700;
+}
+
+.preferences-modal__actions {
+  @apply mt-6 flex justify-end;
+}

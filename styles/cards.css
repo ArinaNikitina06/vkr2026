@@ -1,0 +1,231 @@
+.card {
+  @apply overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md;
+}
+
+.card--page {
+  @apply p-8 shadow-sm;
+}
+
+.card--course {
+  @apply flex h-full flex-col overflow-hidden;
+}
+
+.card__header {
+  @apply mb-2;
+}
+
+.card__body {
+  @apply p-6;
+}
+
+.card__media {
+  @apply relative h-40 w-full overflow-hidden bg-gray-200;
+}
+
+.card__media-link {
+  @apply absolute inset-0 block;
+}
+
+.card__image {
+  @apply h-full w-full object-cover;
+}
+
+.card__favorite {
+  @apply absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white/90 text-gray-600 shadow-sm transition hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.card__media--hero {
+  @apply h-96 w-full;
+}
+
+.card__media--compact {
+  @apply h-48;
+}
+
+.card__content {
+  @apply flex flex-1 flex-col p-4;
+}
+
+.card__title {
+  @apply mb-2 text-xl font-semibold text-gray-900;
+}
+
+.card__title--clamped {
+  @apply line-clamp-2;
+}
+
+.card__description {
+  @apply mb-4 text-sm text-gray-600;
+}
+
+.card__description--clamped {
+  @apply line-clamp-2;
+}
+
+.card__badge {
+  @apply text-xs font-semibold uppercase text-gray-600;
+}
+
+.card__badge--link {
+  @apply rounded-sm hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.card__title-link {
+  @apply block rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.card__bottom {
+  @apply mt-auto flex flex-col gap-3 pt-3;
+}
+
+.card__meta {
+  @apply flex min-h-5 items-center justify-between gap-3 text-xs text-gray-600;
+}
+
+.card__price {
+  @apply min-h-11 rounded-lg bg-sky-50 px-3 py-2 text-base font-bold leading-7 text-sky-700 ring-1 ring-sky-100;
+}
+
+.card__attributes {
+  @apply mb-4 flex flex-wrap gap-2 text-xs text-gray-700;
+}
+
+.card__attributes span {
+  @apply rounded-md bg-gray-100 px-2 py-1;
+}
+
+.card__attributes a {
+  @apply rounded-md bg-gray-100 px-2 py-1 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.card__actions {
+  @apply grid grid-cols-2 gap-2 border-t border-gray-100 pt-3;
+}
+
+.card__action {
+  @apply min-h-10 rounded-md border border-gray-200 px-3 py-2 text-center text-xs font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+}
+
+.card__action--active {
+  @apply border-gray-900 bg-gray-900 text-white hover:bg-gray-800;
+}
+
+.course-row {
+  @apply grid gap-4;
+}
+
+.course-card-row {
+  @apply grid h-full gap-4 overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md md:grid-cols-[12rem_minmax(0,1fr)_9rem];
+}
+
+.course-card-row__media {
+  @apply relative h-32 overflow-hidden bg-gray-200 md:h-full md:min-h-40;
+}
+
+.course-card-row__body {
+  @apply flex min-w-0 flex-col justify-between p-4;
+}
+
+.course-card-row__title {
+  @apply mt-2;
+}
+
+.course-card-row__actions {
+  @apply flex items-center justify-start px-4 pb-5 md:justify-end md:p-4 md:pl-0;
+}
+
+.course-card-row__actions .button {
+  @apply w-full whitespace-nowrap text-center md:w-auto;
+}
+
+.course-progress {
+  @apply mb-4;
+}
+
+.course-progress__header {
+  @apply mb-2 flex items-center justify-between;
+}
+
+.course-progress__label {
+  @apply text-sm text-gray-600;
+}
+
+.course-progress__value {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.progress-bar {
+  @apply h-2 w-full rounded-full bg-gray-200;
+}
+
+.progress-bar__fill {
+  @apply h-2 rounded-full bg-gray-800;
+}
+
+.home-learning {
+  @apply lg:col-span-3;
+}
+
+.home-learning-layout {
+  @apply grid gap-6 lg:grid-cols-4;
+}
+
+.home-learning-layout__header {
+  @apply lg:col-span-4;
+}
+
+.recommendation-section {
+  @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+}
+
+.recommendation-reason {
+  @apply mb-4 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700;
+}
+
+.recommendation-reason__summary {
+  @apply cursor-pointer font-medium text-gray-900;
+}
+
+.recommendation-reason__list {
+  @apply mt-2 list-disc space-y-1 pl-5 text-gray-600;
+}
+
+.skeleton-card {
+  @apply flex h-full animate-pulse flex-col overflow-hidden rounded-lg bg-white shadow-sm;
+}
+
+.skeleton-card__media {
+  @apply h-40 bg-gray-200;
+}
+
+.skeleton-card__body {
+  @apply space-y-3 p-4;
+}
+
+.skeleton-card__line {
+  @apply h-3 rounded bg-gray-200;
+}
+
+.skeleton-card__line--short {
+  @apply w-1/2;
+}
+
+.state-box {
+  @apply rounded-lg border border-gray-200 bg-white p-8 text-center;
+}
+
+.state-box--error {
+  @apply border-red-200 bg-red-50;
+}
+
+.state-box__title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.state-box__description {
+  @apply mt-2 text-sm text-gray-600;
+}
+
+.state-box__action {
+  @apply mt-6;
+}
