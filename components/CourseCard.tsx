@@ -76,7 +76,12 @@ export default function CourseCard({
           aria-label={`${liked ? 'Курс уже отмечен как понравившийся' : 'Отметить как понравившийся'}: ${title}`}
           onClick={handleLike}
         >
-          Нравится
+          <span className="card__action-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" focusable="false">
+              <path d="M10 17.2 8.9 16.1C4.7 12.4 2 10 2 7.1 2 4.8 3.8 3 6.1 3c1.3 0 2.6.6 3.4 1.6C10.3 3.6 11.6 3 12.9 3 15.2 3 17 4.8 17 7.1c0 2.9-2.7 5.3-6.9 9L10 17.2Z" />
+            </svg>
+          </span>
+          <span>Нравится</span>
         </button>
       )}
       {onHide && (
@@ -86,7 +91,12 @@ export default function CourseCard({
           aria-label={`Скрыть курс ${title} из рекомендаций`}
           onClick={() => onHide(id)}
         >
-          Скрыть
+          <span className="card__action-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" focusable="false">
+              <path d="M3.2 3.2a.8.8 0 0 1 1.1 0l12.5 12.5a.8.8 0 0 1-1.1 1.1l-2.2-2.2A8.6 8.6 0 0 1 10 15.4c-4.3 0-7.1-3.4-8.1-5a1.4 1.4 0 0 1 0-1.5 13 13 0 0 1 3-3.2L3.2 4.3a.8.8 0 0 1 0-1.1Zm4 4L5.9 5.9A11 11 0 0 0 3.3 9.7c.9 1.3 3.2 4.1 6.7 4.1.8 0 1.6-.2 2.3-.5l-1.4-1.4a2.5 2.5 0 0 1-3.7-3.7Zm2.1 2.1a.9.9 0 0 0 1.4 1.4L9.3 9.3Zm.7-4.7c4.3 0 7.1 3.4 8.1 5a1.4 1.4 0 0 1 0 1.5 11.5 11.5 0 0 1-1.9 2.4l-1.1-1.1a10.2 10.2 0 0 0 1.6-2.1C15.8 9 13.5 6.2 10 6.2c-.5 0-1 .1-1.5.2L7.2 5.1c.9-.3 1.8-.5 2.8-.5Z" />
+            </svg>
+          </span>
+          <span>Скрыть</span>
         </button>
       )}
     </div>
