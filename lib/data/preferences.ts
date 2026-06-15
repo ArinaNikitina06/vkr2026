@@ -1,4 +1,5 @@
 import type { UserPreferences } from '../types'
+import { courseLevels } from '../types'
 
 export const preferenceGoals = [
   'Смена карьеры',
@@ -15,7 +16,7 @@ export const preferenceInterests = [
   'Маркетинг'
 ] as const
 
-export const preferenceLevels = ['Начальный', 'Средний', 'Продвинутый'] as const
+export const preferenceLevels = courseLevels
 
 export const defaultPreferences: UserPreferences = {
   goal: 'Смена карьеры',

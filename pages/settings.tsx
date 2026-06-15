@@ -18,7 +18,7 @@ import {
 import { defaultUserProfile, getProfileStorageKey, type UserProfile } from '../lib/data/profile'
 import { saveUserPreferences } from '../lib/recommendations/client'
 import { normalizeUserName } from '../lib/userDisplay'
-import type { CourseLevel, UserPreferences } from '../lib/types'
+import type { UserPreferences } from '../lib/types'
 
 export default function Settings(): JSX.Element {
   const router = useRouter()
@@ -191,7 +191,7 @@ export default function Settings(): JSX.Element {
                       <Chip
                         key={level}
                         active={preferences.level === level}
-                        onClick={() => setPreferences((current) => ({ ...current, level: level as CourseLevel }))}
+                        onClick={() => setPreferences((current) => ({ ...current, level }))}
                       >
                         {level}
                       </Chip>

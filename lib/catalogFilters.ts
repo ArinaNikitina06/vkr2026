@@ -1,11 +1,12 @@
+import { catalogAllCategory } from './types'
 import type { CatalogCategory, Course, CourseLevel } from './types'
 
-export type CatalogLevel = 'Все' | CourseLevel
+export type CatalogLevel = typeof catalogAllCategory | CourseLevel
 export type CatalogSort = 'popular' | 'rating' | 'price-asc' | 'duration'
 
 export const defaultCatalogSort: CatalogSort = 'popular'
 
-export const catalogLevels: CatalogLevel[] = ['Все', 'Начальный', 'Средний', 'Продвинутый']
+export const catalogLevels: CatalogLevel[] = [catalogAllCategory, 'Начальный', 'Средний', 'Продвинутый']
 
 export const sortOptions: { value: CatalogSort; label: string }[] = [
   { value: 'popular', label: 'По популярности' },
@@ -13,6 +14,10 @@ export const sortOptions: { value: CatalogSort; label: string }[] = [
   { value: 'price-asc', label: 'Сначала дешевле' },
   { value: 'duration', label: 'По длительности' }
 ]
+
+export function isCatalogSort(value: string): value is CatalogSort {
+  return sortOptions.some((option) => option.value === value)
+}
 
 type FilterCoursesParams = {
   courses: Course[]
@@ -27,14 +32,14 @@ function parsePrice(price: string | undefined): number {
     return 0
   }
 
-  return Number(price.replace(/[^\d]/g, '')) || 0
+  return +price.replace(/[^\d]/g, '') || 0
 }
 
 function parseDuration(duration: string): number {
   const hours = duration.match(/(\d+)ч/)
   const minutes = duration.match(/(\d+)м/)
 
-  return (hours ? Number(hours[1]) * 60 : 0) + (minutes ? Number(minutes[1]) : 0)
+  return (hours ? +hours[1] * 60 : 0) + (minutes ? +minutes[1] : 0)
 }
 
 function checkCourseSearch(course: Course, search: string): boolean {
@@ -57,8 +62,8 @@ export function filterCourses({
 }: FilterCoursesParams): Course[] {
   return courses
     .filter((course) => {
-      const matchesCategory = category === 'Все' || course.category === category.toUpperCase()
-      const matchesLevel = level === 'Все' || course.level === level
+      const matchesCategory = category === catalogAllCategory || course.category === category.toUpperCase()
+      const matchesLevel = level === catalogAllCategory || course.level === level
 
       return matchesCategory && matchesLevel && checkCourseSearch(course, search)
     })

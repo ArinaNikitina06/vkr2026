@@ -56,11 +56,15 @@ export async function saveUserPreferences(preferences: UserPreferences): Promise
 }
 
 export async function sendCourseInteraction(courseId: string, type: CourseInteractionType): Promise<void> {
-  await fetch('/api/interactions', {
+  const response = await fetch('/api/interactions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ courseId, type })
   })
+
+  if (!response.ok) {
+    throw new Error('Interaction request failed')
+  }
 }

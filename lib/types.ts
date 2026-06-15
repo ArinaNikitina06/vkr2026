@@ -1,8 +1,32 @@
-export type CourseLevel = 'Начальный' | 'Средний' | 'Продвинутый'
+export const courseLevels = ['Начальный', 'Средний', 'Продвинутый'] as const
 
-export type CourseCategory = 'ДИЗАЙН' | 'РАЗРАБОТКА' | 'БИЗНЕС' | 'ДАННЫЕ' | 'МАРКЕТИНГ'
+export type CourseLevel = (typeof courseLevels)[number]
 
-export type CatalogCategory = 'Все' | string
+export const courseCategories = ['ДИЗАЙН', 'РАЗРАБОТКА', 'БИЗНЕС', 'ДАННЫЕ', 'МАРКЕТИНГ'] as const
+
+export type CourseCategory = (typeof courseCategories)[number]
+
+export const catalogAllCategory = 'Все'
+
+export type CatalogCourseCategory = 'Дизайн' | 'Разработка' | 'Бизнес' | 'Данные' | 'Маркетинг'
+
+export type CatalogCategory = typeof catalogAllCategory | CatalogCourseCategory
+
+export const catalogCategoryLabels: Record<CourseCategory, CatalogCourseCategory> = {
+  ДИЗАЙН: 'Дизайн',
+  РАЗРАБОТКА: 'Разработка',
+  БИЗНЕС: 'Бизнес',
+  ДАННЫЕ: 'Данные',
+  МАРКЕТИНГ: 'Маркетинг'
+}
+
+export function isCourseLevel(value: string): value is CourseLevel {
+  return courseLevels.includes(value as CourseLevel)
+}
+
+export function isCourseCategory(value: string): value is CourseCategory {
+  return courseCategories.includes(value as CourseCategory)
+}
 
 export type CurriculumItem = {
   title: string

@@ -1,10 +1,15 @@
 import { defaultPreferences } from '../data/preferences'
 import { parseJsonArray } from '../json'
-import type { CourseLevel, UserPreferences } from '../types'
+import { isCourseLevel } from '../types'
+import type { UserPreferences } from '../types'
 import { prisma } from './prisma'
 
 function parseInterests(value: string | null | undefined): string[] {
   return parseJsonArray<string>(value, defaultPreferences.interests)
+}
+
+function parseStoredLevel(value: string): UserPreferences['level'] {
+  return isCourseLevel(value) ? value : defaultPreferences.level
 }
 
 export async function getStoredPreferences(userEmail: string): Promise<UserPreferences> {
@@ -32,7 +37,7 @@ export async function getStoredPreferences(userEmail: string): Promise<UserPrefe
     return {
       goal: preferences.goal,
       interests: parseInterests(preferences.interestsJson),
-      level: preferences.level as CourseLevel,
+      level: parseStoredLevel(preferences.level),
       consent: preferences.consent,
       onboarded: preferences.onboarded
     }
@@ -84,7 +89,7 @@ export async function saveStoredPreferences(userEmail: string, input: Partial<Us
     return {
       goal: preferences.goal,
       interests: parseInterests(preferences.interestsJson),
-      level: preferences.level as CourseLevel,
+      level: parseStoredLevel(preferences.level),
       consent: preferences.consent,
       onboarded: preferences.onboarded
     }

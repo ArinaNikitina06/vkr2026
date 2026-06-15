@@ -1,7 +1,13 @@
 import { courseExists, ensureCoursesSeeded } from './courseRepository'
 import { prisma } from './prisma'
 
-export type InteractionType = 'view' | 'like' | 'hide' | 'bookmark' | 'search'
+export const interactionTypes = ['view', 'like', 'hide', 'bookmark', 'search'] as const
+
+export type InteractionType = (typeof interactionTypes)[number]
+
+export function isInteractionType(value: string): value is InteractionType {
+  return interactionTypes.includes(value as InteractionType)
+}
 
 export async function saveInteraction(
   userEmail: string,

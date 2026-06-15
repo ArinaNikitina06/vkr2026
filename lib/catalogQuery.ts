@@ -5,6 +5,7 @@ import {
   type CatalogLevel,
   type CatalogSort
 } from './catalogFilters'
+import { catalogAllCategory } from './types'
 import type { CatalogCategory } from './types'
 
 export type CatalogQueryState = {
@@ -16,21 +17,21 @@ export type CatalogQueryState = {
 
 export function normalizeCatalogCategory(
   value?: string,
-  catalogCategories: CatalogCategory[] = ['Все']
+  catalogCategories: CatalogCategory[] = [catalogAllCategory]
 ): CatalogCategory {
   if (!value) {
-    return 'Все'
+    return catalogAllCategory
   }
 
-  return catalogCategories.find((item) => item.toLowerCase() === value.toLowerCase()) ?? 'Все'
+  return catalogCategories.find((item) => item.toLowerCase() === value.toLowerCase()) ?? catalogAllCategory
 }
 
 export function normalizeCatalogLevel(value?: string): CatalogLevel {
   if (!value) {
-    return 'Все'
+    return catalogAllCategory
   }
 
-  return catalogLevels.find((item) => item.toLowerCase() === value.toLowerCase()) ?? 'Все'
+  return catalogLevels.find((item) => item.toLowerCase() === value.toLowerCase()) ?? catalogAllCategory
 }
 
 export function normalizeCatalogSort(value?: string): CatalogSort {
@@ -49,11 +50,11 @@ export function buildCatalogPath(filters: CatalogQueryState): string {
     params.set('q', search)
   }
 
-  if (filters.category !== 'Все') {
+  if (filters.category !== catalogAllCategory) {
     params.set('category', filters.category)
   }
 
-  if (filters.level !== 'Все') {
+  if (filters.level !== catalogAllCategory) {
     params.set('level', filters.level)
   }
 

@@ -1,9 +1,18 @@
 import type { Course, RecommendationItem, UserPreferences } from '../types'
 
-type RecommendationSignals = {
+export type RecommendationSignals = {
   hiddenCourseIds?: string[]
   likedCourseIds?: string[]
   bookmarkedCourseIds?: string[]
+}
+
+const recommendationWeights = {
+  interestMatch: 2,
+  goalMatch: 1.2,
+  levelMatch: 1.5,
+  directPositiveSignal: 1,
+  similarPositiveSignal: 1.3,
+  popularCourse: 0.5
 }
 
 function hasCommonTags(course: Course, sourceCourse: Course): boolean {
@@ -53,42 +62,42 @@ export function rankCourses(
       let score = course.rating
 
       if (preferences.interests.some((interest) => course.tags.includes(interest))) {
-        score += 2
+        score += recommendationWeights.interestMatch
         reasons.push('Соответствует вашим интересам')
       }
 
       if (checkGoalMatch(course, preferences.goal)) {
-        score += 1.2
+        score += recommendationWeights.goalMatch
         reasons.push('Соответствует вашей цели')
       }
 
       if (course.level === preferences.level) {
-        score += 1.5
+        score += recommendationWeights.levelMatch
         reasons.push('Подходит вашему уровню')
       }
 
       if (likedCourseIds.has(course.id)) {
-        score += 1
+        score += recommendationWeights.directPositiveSignal
         reasons.push('Вы отметили этот курс как полезный')
       }
 
       if (bookmarkedCourseIds.has(course.id)) {
-        score += 1
+        score += recommendationWeights.directPositiveSignal
         reasons.push('Курс сохранен в избранном')
       }
 
       if (signalCourses.some((signalCourse) => signalCourse.id !== course.id && hasCommonTags(course, signalCourse))) {
-        score += 1.3
-        reasons.push('Похож на сохраненные курсы')
+        score += recommendationWeights.similarPositiveSignal
+        reasons.push('Похож на отмеченные вами курсы')
       }
 
       if (course.students > 2000) {
-        score += 0.5
+        score += recommendationWeights.popularCourse
         reasons.push('Популярно среди студентов')
       }
 
       if (reasons.length === 0) {
-        reasons.push('Добавлено как популярный курс для старта')
+        reasons.push('Может расширить выбор курсов')
       }
 
       return {
@@ -132,7 +141,7 @@ export function getSimilarCourses(
 
       if (signalCourses.some((signalCourse) => signalCourse.id !== item.id && hasCommonTags(item, signalCourse))) {
         score += 1.2
-        reasons.push('Похож на сохраненные курсы')
+        reasons.push('Похож на отмеченные вами курсы')
       }
 
       return {

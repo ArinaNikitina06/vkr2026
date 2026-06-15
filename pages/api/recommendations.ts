@@ -3,7 +3,8 @@ import { defaultPreferences } from '../../lib/data/preferences'
 import { getQueryValue, parseCommaSeparatedList } from '../../lib/queryParams'
 import { getSimilarCourses, rankCourses } from '../../lib/recommendations/rank'
 import { getCoursesFromDatabase } from '../../lib/server/courseRepository'
-import type { CourseLevel, RecommendationItem, UserPreferences } from '../../lib/types'
+import { isCourseLevel } from '../../lib/types'
+import type { RecommendationItem, UserPreferences } from '../../lib/types'
 
 type RecommendationSectionResponse = {
   title: string
@@ -16,13 +17,13 @@ type RecommendationsResponse = {
 
 function parsePreferences(request: NextApiRequest): UserPreferences {
   const goal = getQueryValue(request.query.goal) ?? defaultPreferences.goal
-  const level = (getQueryValue(request.query.level) ?? defaultPreferences.level) as CourseLevel
+  const levelQuery = getQueryValue(request.query.level)
   const interests = parseCommaSeparatedList(request.query.interests)
 
   return {
     ...defaultPreferences,
     goal,
-    level,
+    level: levelQuery && isCourseLevel(levelQuery) ? levelQuery : defaultPreferences.level,
     interests: interests.length > 0 ? interests : defaultPreferences.interests,
     consent: true,
     onboarded: true

@@ -5,7 +5,8 @@ import {
   preferenceInterests,
   preferenceLevels
 } from '../lib/data/preferences'
-import type { CourseLevel, UserPreferences } from '../lib/types'
+import { isCourseLevel } from '../lib/types'
+import type { UserPreferences } from '../lib/types'
 
 type PreferencesModalProps = {
   onSave: (preferences: UserPreferences) => void
@@ -124,7 +125,11 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
             <select
               id="learning-level"
               value={preferences.level}
-              onChange={(event) => setPreferences({ ...preferences, level: event.target.value as CourseLevel })}
+              onChange={(event) => {
+                if (isCourseLevel(event.target.value)) {
+                  setPreferences({ ...preferences, level: event.target.value })
+                }
+              }}
               className="settings-input"
             >
               {preferenceLevels.map((level) => (

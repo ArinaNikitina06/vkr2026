@@ -1,3 +1,9 @@
+import {
+  catalogAllCategory,
+  catalogCategoryLabels,
+  isCourseCategory,
+  isCourseLevel
+} from '../types'
 import { parseJsonArray } from '../json'
 import type { CatalogCategory, Course, CourseCategory, CourseLevel, CurriculumItem, LearningCourse } from '../types'
 import { seedCourses } from './courseSeedData'
@@ -37,11 +43,19 @@ function parseCurriculum(value: string | null | undefined): CurriculumItem[] | u
   return parsedCurriculum.length > 0 ? parsedCurriculum : undefined
 }
 
+function parseCourseCategory(value: string): CourseCategory {
+  return isCourseCategory(value) ? value : 'ДИЗАЙН'
+}
+
+function parseCourseLevel(value: string): CourseLevel {
+  return isCourseLevel(value) ? value : 'Начальный'
+}
+
 export function mapPrismaCourse(course: PrismaCourse): Course {
   return {
     id: course.id,
     image: course.image,
-    category: course.category as CourseCategory,
+    category: parseCourseCategory(course.category),
     title: course.title,
     description: course.description,
     fullDescription: course.fullDescription ?? undefined,
@@ -52,7 +66,7 @@ export function mapPrismaCourse(course: PrismaCourse): Course {
     tags: parseJsonList(course.tagsJson),
     duration: course.duration,
     students: course.students,
-    level: course.level as CourseLevel,
+    level: parseCourseLevel(course.level),
     rating: course.rating,
     reviews: course.reviews,
     price: course.price ?? undefined,
@@ -148,10 +162,8 @@ export async function getCourseByIdFromDatabase(courseId: string): Promise<Cours
   return course ? mapPrismaCourse(course) : null
 }
 
-function formatCatalogCategory(category: string): CatalogCategory {
-  const lowerCategory = category.toLowerCase()
-
-  return lowerCategory.charAt(0).toUpperCase() + lowerCategory.slice(1)
+function formatCatalogCategory(category: CourseCategory): CatalogCategory {
+  return catalogCategoryLabels[category]
 }
 
 export async function getCatalogCategoriesFromDatabase(): Promise<CatalogCategory[]> {
@@ -167,7 +179,10 @@ export async function getCatalogCategoriesFromDatabase(): Promise<CatalogCategor
     }
   })
 
-  return ['Все', ...categories.map((item) => formatCatalogCategory(item.category))]
+  return [
+    catalogAllCategory,
+    ...categories.map((item) => formatCatalogCategory(parseCourseCategory(item.category)))
+  ]
 }
 
 export type LearningCourseCollections = {

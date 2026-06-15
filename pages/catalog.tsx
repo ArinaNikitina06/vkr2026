@@ -17,6 +17,7 @@ import {
   catalogLevels,
   defaultCatalogSort,
   filterCourses,
+  isCatalogSort,
   sortOptions,
   type CatalogLevel,
   type CatalogSort
@@ -163,7 +164,11 @@ export default function Catalog({ catalogCategories, courses }: CatalogProps): J
             <select
               id="catalog-sort"
               value={activeSort}
-              onChange={(event) => updateFilters({ sort: event.target.value as CatalogSort })}
+              onChange={(event) => {
+                if (isCatalogSort(event.target.value)) {
+                  updateFilters({ sort: event.target.value })
+                }
+              }}
               className="catalog-sort__select"
             >
               {sortOptions.map((option) => (

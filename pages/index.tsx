@@ -34,11 +34,32 @@ import { readLocalStorageText, removeLocalStorageValue } from '../lib/storage'
 import { getUserDisplayName } from '../lib/userDisplay'
 import type { Course, LearningCourse, RecommendationItem, UserPreferences } from '../lib/types'
 
+const registrationOnboardingFlag = '1'
 const emptyCourseIds: string[] = []
 
 type HomeProps = {
   courses: Course[]
   learningCourses: LearningCourse[]
+}
+
+type StoredHomeState = {
+  hiddenCourseIds: string[]
+  preferences: UserPreferences
+  shouldOpenOnboarding: boolean
+}
+
+function isOnboardingRequested(queryValue: string | string[] | undefined): boolean {
+  return Array.isArray(queryValue)
+    ? queryValue.includes(registrationOnboardingFlag)
+    : queryValue === registrationOnboardingFlag
+}
+
+function shouldOpenOnboarding(
+  preferences: UserPreferences,
+  isRegistrationOnboarding: boolean,
+  isPendingOnboarding: boolean
+): boolean {
+  return (isRegistrationOnboarding || isPendingOnboarding) && !preferences.onboarded
 }
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async (context) => {
@@ -76,6 +97,24 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
     ? `Добрый день, ${userName}`
     : 'Добрый день'
 
+  const readStoredHomeState = useCallback((): StoredHomeState => {
+    const storedPreferences = userPreferencesStorage.read()
+    const storedHiddenCourseIds = hiddenCourseStorage.read()
+    const pendingOnboardingValue = readLocalStorageText(pendingOnboardingStorageKey)
+    const isPendingOnboarding = isPendingOnboardingForUser(pendingOnboardingValue, session?.user?.email)
+    const isRegistrationOnboarding = isOnboardingRequested(router.query.onboarding)
+
+    return {
+      hiddenCourseIds: storedHiddenCourseIds,
+      preferences: storedPreferences,
+      shouldOpenOnboarding: shouldOpenOnboarding(
+        storedPreferences,
+        isRegistrationOnboarding,
+        isPendingOnboarding
+      )
+    }
+  }, [hiddenCourseStorage, router.query.onboarding, session?.user?.email, userPreferencesStorage])
+
   const loadRecommendations = useCallback(async (nextPreferences: UserPreferences, nextHiddenCourseIds: string[]) => {
     setIsLoading(true)
     setRecommendationsError(false)
@@ -96,6 +135,36 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
     }
   }, [likedCourseStorage])
 
+  const applyStoredHomeState = useCallback((homeState: StoredHomeState) => {
+    setPreferences(homeState.preferences)
+    setHiddenCourseIds(homeState.hiddenCourseIds)
+    setShouldShowOnboardingModal(homeState.shouldOpenOnboarding)
+    removeLocalStorageValue(pendingOnboardingStorageKey)
+
+    if (homeState.preferences.onboarded) {
+      loadRecommendations(homeState.preferences, homeState.hiddenCourseIds)
+      return
+    }
+
+    setIsLoading(false)
+  }, [loadRecommendations])
+
+  const syncPreferencesWithServer = async (nextPreferences: UserPreferences): Promise<void> => {
+    try {
+      await saveUserPreferences(nextPreferences)
+    } catch {
+      toast.info('Настройки сохранены локально')
+    }
+  }
+
+  const saveInteraction = async (courseId: string, type: 'hide' | 'like'): Promise<void> => {
+    try {
+      await sendCourseInteraction(courseId, type)
+    } catch {
+      toast.info('Действие сохранено локально')
+    }
+  }
+
   useEffect(() => {
     if (status === 'loading' || !router.isReady) {
       return
@@ -106,23 +175,8 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
       return
     }
 
-    const nextPreferences = userPreferencesStorage.read()
-    const nextHiddenCourseIds = hiddenCourseStorage.read()
-    const pendingOnboardingValue = readLocalStorageText(pendingOnboardingStorageKey)
-    const isPendingOnboarding = isPendingOnboardingForUser(pendingOnboardingValue, session?.user?.email)
-    const isRegistrationOnboarding = router.query.onboarding === '1'
-    const shouldOpenOnboarding = (isRegistrationOnboarding || isPendingOnboarding) && !nextPreferences.onboarded
-
-    setPreferences(nextPreferences)
-    setHiddenCourseIds(nextHiddenCourseIds)
-    setShouldShowOnboardingModal(shouldOpenOnboarding)
-    removeLocalStorageValue(pendingOnboardingStorageKey)
-    if (nextPreferences.onboarded) {
-      loadRecommendations(nextPreferences, nextHiddenCourseIds)
-    } else {
-      setIsLoading(false)
-    }
-  }, [hiddenCourseStorage, isAuthenticated, loadRecommendations, router, session?.user?.email, status, userPreferencesStorage])
+    applyStoredHomeState(readStoredHomeState())
+  }, [applyStoredHomeState, isAuthenticated, readStoredHomeState, router.isReady, status])
 
   const handleSavePreferences = async (nextPreferences: UserPreferences) => {
     setPreferences(nextPreferences)
@@ -131,12 +185,7 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
     setShouldShowOnboardingModal(false)
     router.replace('/', undefined, { shallow: true })
     toast.success('Настройки сохранены, рекомендации обновлены')
-
-    try {
-      await saveUserPreferences(nextPreferences)
-    } catch {
-      toast.info('Настройки сохранены локально')
-    }
+    await syncPreferencesWithServer(nextPreferences)
 
     loadRecommendations(nextPreferences, hiddenCourseIds)
   }
@@ -146,12 +195,7 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
 
     setHiddenCourseIds(nextHiddenIds)
     hiddenCourseStorage.save(nextHiddenIds)
-
-    try {
-      await sendCourseInteraction(courseId, 'hide')
-    } catch {
-      toast.info('Действие сохранено локально')
-    }
+    await saveInteraction(courseId, 'hide')
 
     await loadRecommendations(preferences, nextHiddenIds)
     toast.success('Курс скрыт из рекомендаций')
@@ -161,12 +205,7 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
     const nextLikedIds = Array.from(new Set([...likedCourseStorage.read(), courseId]))
 
     likedCourseStorage.save(nextLikedIds)
-
-    try {
-      await sendCourseInteraction(courseId, 'like')
-    } catch {
-      toast.info('Действие сохранено локально')
-    }
+    await saveInteraction(courseId, 'like')
 
     await loadRecommendations(preferences, hiddenCourseIds)
     toast.success('Отметка учтена для будущих рекомендаций')

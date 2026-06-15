@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSessionUserId } from '../../lib/server/apiSession'
-import { saveInteraction, type InteractionType } from '../../lib/server/interactionsRepository'
+import {
+  isInteractionType,
+  saveInteraction,
+  type InteractionType
+} from '../../lib/server/interactionsRepository'
 
 type InteractionRequest = {
   courseId?: string
-  type?: InteractionType
+  type?: string
   metadata?: Record<string, unknown>
 }
 
@@ -12,6 +16,22 @@ type InteractionResponse = {
   ok: boolean
   type: InteractionType
   courseId?: string
+}
+
+function parseInteractionRequest(body: unknown): InteractionRequest {
+  if (!body || typeof body !== 'object') {
+    return {}
+  }
+
+  const requestBody = body as Record<string, unknown>
+
+  return {
+    courseId: typeof requestBody.courseId === 'string' ? requestBody.courseId : undefined,
+    metadata: typeof requestBody.metadata === 'object' && requestBody.metadata !== null
+      ? requestBody.metadata as Record<string, unknown>
+      : undefined,
+    type: typeof requestBody.type === 'string' ? requestBody.type : undefined
+  }
 }
 
 export default async function handler(
@@ -31,14 +51,14 @@ export default async function handler(
     return
   }
 
-  const { courseId, type } = request.body as InteractionRequest
+  const { courseId, metadata, type } = parseInteractionRequest(request.body)
 
-  if (!type) {
+  if (!type || !isInteractionType(type)) {
     response.status(400).json({ message: 'Interaction type is required' })
     return
   }
 
-  await saveInteraction(userEmail, type, courseId, request.body.metadata)
+  await saveInteraction(userEmail, type, courseId, metadata)
 
   response.status(200).json({
     ok: true,
