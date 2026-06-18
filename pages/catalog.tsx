@@ -3,6 +3,7 @@ import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import Chip from '../components/ui/Chip'
 import SearchInput from '../components/ui/SearchInput'
+import SelectField from '../components/ui/SelectField'
 import type { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
@@ -159,25 +160,20 @@ export default function Catalog({ catalogCategories, courses }: CatalogProps): J
             ))}
           </div>
 
-          <div className="catalog-sort">
-            <label htmlFor="catalog-sort" className="catalog-sort__label">Сортировка</label>
-            <select
-              id="catalog-sort"
-              value={activeSort}
-              onChange={(event) => {
-                if (isCatalogSort(event.target.value)) {
-                  updateFilters({ sort: event.target.value })
-                }
-              }}
-              className="catalog-sort__select"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            id="catalog-sort"
+            label="Сортировка"
+            value={activeSort}
+            onChange={(event) => {
+              if (isCatalogSort(event.target.value)) {
+                updateFilters({ sort: event.target.value })
+              }
+            }}
+            options={sortOptions}
+            wrapperClassName="catalog-sort"
+            labelClassName="catalog-sort__label"
+            selectClassName="catalog-sort__select"
+          />
         </section>
 
         <section className="page-container section">

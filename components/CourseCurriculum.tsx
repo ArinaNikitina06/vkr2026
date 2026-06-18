@@ -14,7 +14,6 @@ export default function CourseCurriculum({ sections }: CourseCurriculumProps): J
             <button
               className="course-curriculum__button"
               type="button"
-              aria-label={`Открыть раздел ${section.title}`}
             >
               <div>
                 <h3 className="course-curriculum__title">{section.title}</h3>

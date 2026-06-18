@@ -114,14 +114,6 @@
   @apply mb-6 text-gray-600;
 }
 
-.preferences-modal__consent {
-  @apply mt-4 flex items-center gap-3 text-sm font-medium text-gray-800 lg:mt-0;
-}
-
-.preferences-modal__consent input {
-  @apply h-5 w-5 rounded border-gray-300;
-}
-
 .preferences-modal__selected-interests {
   @apply mt-3 flex flex-wrap gap-2;
 }

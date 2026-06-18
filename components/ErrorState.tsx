@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import StateBox from './ui/StateBox'
 
 type ErrorStateProps = {
   title?: string
@@ -12,10 +13,12 @@ export default function ErrorState({
   action
 }: ErrorStateProps): JSX.Element {
   return (
-    <div className="state-box state-box--error" role="alert">
-      <h3 className="state-box__title">{title}</h3>
-      <p className="state-box__description">{description}</p>
-      {action && <div className="state-box__action">{action}</div>}
-    </div>
+    <StateBox
+      title={title}
+      description={description}
+      action={action}
+      tone="error"
+      role="alert"
+    />
   )
 }

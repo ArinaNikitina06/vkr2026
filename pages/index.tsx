@@ -1,4 +1,5 @@
 import Header from '../components/Header'
+import Button from '../components/ui/Button'
 import CourseGrid from '../components/CourseGrid'
 import EmptyState from '../components/EmptyState'
 import ErrorState from '../components/ErrorState'
@@ -297,13 +298,12 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
             <ErrorState
               description="Не получилось получить персональную ленту."
               action={(
-                <button
-                  type="button"
-                  className="button button--secondary"
+                <Button
+                  variant="secondary"
                   onClick={() => loadRecommendations(preferences, hiddenCourseIds)}
                 >
                   Повторить
-                </button>
+                </Button>
               )}
             />
           ) : personalRecommendations.length > 0 ? (
@@ -328,13 +328,12 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
             <ErrorState
               description="Не получилось получить курсы по интересам."
               action={(
-                <button
-                  type="button"
-                  className="button button--secondary"
+                <Button
+                  variant="secondary"
                   onClick={() => loadRecommendations(preferences, hiddenCourseIds)}
                 >
                   Повторить
-                </button>
+                </Button>
               )}
             />
           ) : (

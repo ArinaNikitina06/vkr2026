@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import RecommendationReason from './RecommendationReason'
+import CardActionButton from './ui/CardActionButton'
+import Tag from './ui/Tag'
 
 type CourseCardProps = {
   id: string
@@ -58,20 +60,20 @@ export default function CourseCard({
     onLike?.(id)
   }
 
-  const categoryElement = disableMetaLinks ? (
-    <span className="card__badge">{category}</span>
-  ) : (
-    <Link href={`/catalog?category=${encodeURIComponent(category)}`} className="card__badge card__badge--link">
+  const categoryHref = disableMetaLinks
+    ? undefined
+    : `/catalog?category=${encodeURIComponent(category)}`
+  const categoryElement = (
+    <Tag href={categoryHref} className={`card__badge ${categoryHref ? 'card__badge--link' : ''}`.trim()}>
       {category}
-    </Link>
+    </Tag>
   )
 
   const actions = (onLike || onHide) ? (
     <div className="card__actions">
       {onLike && (
-        <button
-          type="button"
-          className={`card__action ${liked ? 'card__action--active' : ''}`}
+        <CardActionButton
+          active={liked}
           aria-pressed={liked}
           aria-label={`${liked ? 'Курс уже отмечен как понравившийся' : 'Отметить как понравившийся'}: ${title}`}
           onClick={handleLike}
@@ -82,12 +84,10 @@ export default function CourseCard({
             </svg>
           </span>
           <span>Нравится</span>
-        </button>
+        </CardActionButton>
       )}
       {onHide && (
-        <button
-          type="button"
-          className="card__action"
+        <CardActionButton
           aria-label={`Скрыть курс ${title} из рекомендаций`}
           onClick={() => onHide(id)}
         >
@@ -97,7 +97,7 @@ export default function CourseCard({
             </svg>
           </span>
           <span>Скрыть</span>
-        </button>
+        </CardActionButton>
       )}
     </div>
   ) : null
@@ -125,26 +125,22 @@ export default function CourseCard({
       {visibleTags.length > 0 && (
         <div className="form-tags form-tags--card">
           {visibleTags.map((tag) => (
-            disableMetaLinks ? (
-              <span key={tag} className="tag">{tag}</span>
-            ) : (
-              <Link key={tag} href={`/catalog?tag=${encodeURIComponent(tag)}`} className="tag">
-                {tag}
-              </Link>
-            )
+            <Tag
+              key={tag}
+              href={disableMetaLinks ? undefined : `/catalog?tag=${encodeURIComponent(tag)}`}
+              className="tag"
+            >
+              {tag}
+            </Tag>
           ))}
         </div>
       )}
 
       <div className="card__attributes">
         {level && (
-          disableMetaLinks ? (
-            <span>{level}</span>
-          ) : (
-            <Link href={`/catalog?level=${encodeURIComponent(level)}`}>
-              {level}
-            </Link>
-          )
+          <Tag href={disableMetaLinks ? undefined : `/catalog?level=${encodeURIComponent(level)}`}>
+            {level}
+          </Tag>
         )}
         {rating && <span>Рейтинг {rating.toFixed(1)}</span>}
       </div>

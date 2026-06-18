@@ -1,4 +1,5 @@
 import Header from '../../components/Header'
+import Button from '../../components/ui/Button'
 import CourseCurriculum from '../../components/CourseCurriculum'
 import CourseIncludes from '../../components/CourseIncludes'
 import CourseInstructor from '../../components/CourseInstructor'
@@ -154,13 +155,9 @@ export default function CoursePage({ course }: CoursePageProps): JSX.Element {
                     <span className="course-panel-summary__label">Стоимость</span>
                     <strong className="course-panel-summary__value">{course.price ?? 'Бесплатно'}</strong>
                   </div>
-                  <button
-                    className="button button--primary button--full"
-                    type="button"
-                    onClick={enrollCourse}
-                  >
+                  <Button fullWidth onClick={enrollCourse}>
                     {enrolled ? 'Вы записаны' : 'Записаться'}
-                  </button>
+                  </Button>
                 </div>
                 <CourseIncludes items={includes} />
               </div>

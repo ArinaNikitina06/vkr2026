@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import Button from './ui/Button'
+import Checkbox from './ui/Checkbox'
+import SelectField from './ui/SelectField'
 import {
   defaultPreferences,
   preferenceGoals,
@@ -67,39 +70,29 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
           </h2>
           <p className="preferences-modal__subtitle">Настройте свои рекомендации.</p>
 
-          <div className="form-group">
-            <label className="settings-label" htmlFor="learning-goal">
-              Основная цель
-            </label>
-            <select
-              id="learning-goal"
-              value={preferences.goal}
-              onChange={(event) => setPreferences({ ...preferences, goal: event.target.value })}
-              className="settings-input"
-            >
-              {preferenceGoals.map((goal) => (
-                <option key={goal}>{goal}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            id="learning-goal"
+            label="Основная цель"
+            value={preferences.goal}
+            onChange={(event) => setPreferences({ ...preferences, goal: event.target.value })}
+            options={preferenceGoals.map((goal) => ({ label: goal, value: goal }))}
+          />
 
-          <div className="form-group">
-            <label className="settings-label" htmlFor="learning-interest">
-              Интересы
-            </label>
-            <select
+          <>
+            <SelectField
               id="learning-interest"
+              label="Интересы"
               value=""
               onChange={(event) => addInterest(event.target.value)}
-              className="settings-input"
-            >
-              <option value="">Выберите направление</option>
-              {preferenceInterests.map((interest) => (
-                <option key={interest} value={interest} disabled={preferences.interests.includes(interest)}>
-                  {interest}
-                </option>
-              ))}
-            </select>
+              options={[
+                { label: 'Выберите направление', value: '' },
+                ...preferenceInterests.map((interest) => ({
+                  disabled: preferences.interests.includes(interest),
+                  label: interest,
+                  value: interest
+                }))
+              ]}
+            />
             {preferences.interests.length > 0 && (
               <div className="preferences-modal__selected-interests" aria-label="Выбранные интересы">
                 {preferences.interests.map((interest) => (
@@ -116,27 +109,19 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
                 ))}
               </div>
             )}
-          </div>
+          </>
 
-          <div className="form-group">
-            <label className="settings-label" htmlFor="learning-level">
-              Уровень подготовки
-            </label>
-            <select
-              id="learning-level"
-              value={preferences.level}
-              onChange={(event) => {
-                if (isCourseLevel(event.target.value)) {
-                  setPreferences({ ...preferences, level: event.target.value })
-                }
-              }}
-              className="settings-input"
-            >
-              {preferenceLevels.map((level) => (
-                <option key={level}>{level}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            id="learning-level"
+            label="Уровень подготовки"
+            value={preferences.level}
+            onChange={(event) => {
+              if (isCourseLevel(event.target.value)) {
+                setPreferences({ ...preferences, level: event.target.value })
+              }
+            }}
+            options={preferenceLevels.map((level) => ({ label: level, value: level }))}
+          />
         </div>
 
         <div className="settings-summary">
@@ -146,22 +131,19 @@ export default function PreferencesModal({ onSave }: PreferencesModalProps): JSX
               Платформа использует выбранные цели и интересы, чтобы показать стартовую подборку курсов.
             </p>
           </div>
-          <label className="preferences-modal__consent">
-            <input
-              type="checkbox"
-              checked={preferences.consent}
-              onChange={(event) => setPreferences({ ...preferences, consent: event.target.checked })}
-            />
-            <span>Согласна на использование данных для персонализации</span>
-          </label>
+          <Checkbox
+            checked={preferences.consent}
+            onChange={(event) => setPreferences({ ...preferences, consent: event.target.checked })}
+            label="Согласна на использование данных для персонализации"
+          />
         </div>
 
         {error && <p className="preferences-modal__error">{error}</p>}
 
         <div className="preferences-modal__actions">
-          <button className="settings-button" type="button" onClick={handleSubmit}>
+          <Button onClick={handleSubmit}>
             Показать рекомендации
-          </button>
+          </Button>
         </div>
       </section>
     </div>
