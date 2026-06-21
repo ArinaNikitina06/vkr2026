@@ -5,12 +5,14 @@ type RecommendationCourseGridProps = {
   items: RecommendationItem[]
   onLike?: (courseId: string) => void
   onHide?: (courseId: string) => void
+  onOpen?: (courseId: string) => void
 }
 
 export default function RecommendationCourseGrid({
   items,
   onLike,
-  onHide
+  onHide,
+  onOpen
 }: RecommendationCourseGridProps): JSX.Element {
   return (
     <div className="grid-cards">
@@ -21,6 +23,7 @@ export default function RecommendationCourseGrid({
           reasons={item.reasons}
           onLike={onLike}
           onHide={onHide}
+          onOpen={onOpen}
           {...item.course}
         />
       ))}

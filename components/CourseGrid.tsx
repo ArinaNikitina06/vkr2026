@@ -5,12 +5,14 @@ type CourseGridProps = {
   courses: Course[]
   getHref?: (course: Course) => string
   disableMetaLinks?: boolean
+  onOpen?: (courseId: string) => void
 }
 
 export default function CourseGrid({
   courses,
   getHref = (course) => `/course/${course.id}`,
-  disableMetaLinks = false
+  disableMetaLinks = false,
+  onOpen
 }: CourseGridProps): JSX.Element {
   return (
     <div className="grid-cards">
@@ -19,6 +21,7 @@ export default function CourseGrid({
           key={course.id}
           href={getHref(course)}
           disableMetaLinks={disableMetaLinks}
+          onOpen={onOpen}
           {...course}
         />
       ))}

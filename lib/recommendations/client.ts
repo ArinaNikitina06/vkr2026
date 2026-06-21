@@ -1,6 +1,6 @@
 import type { RecommendationItem, UserPreferences } from '../types'
 
-export type CourseInteractionType = 'like' | 'hide' | 'view'
+export type CourseInteractionType = 'click' | 'like' | 'hide' | 'view'
 
 type RecommendationsResponse = {
   sections: {

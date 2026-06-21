@@ -115,6 +115,10 @@ export default function CoursePage({ course }: CoursePageProps): JSX.Element {
     toast.success('Запись на курс сохранена в прототипе')
   }
 
+  const handleOpenSimilarCourse = (courseId: string) => {
+    void sendCourseInteraction(courseId, 'click').catch(() => undefined)
+  }
+
   return (
     <>
       <Header />
@@ -199,7 +203,7 @@ export default function CoursePage({ course }: CoursePageProps): JSX.Element {
           ) : similarCoursesError ? (
             <ErrorState description="Не получилось загрузить похожие курсы." />
           ) : similarCourses.length > 0 ? (
-            <RecommendationCourseGrid items={similarCourses} />
+            <RecommendationCourseGrid items={similarCourses} onOpen={handleOpenSimilarCourse} />
           ) : (
             <EmptyState
               title="Похожие курсы не найдены"

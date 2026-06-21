@@ -1,7 +1,7 @@
 import { courseExists, ensureCoursesSeeded } from './courseRepository'
 import { prisma } from './prisma'
 
-export const interactionTypes = ['view', 'like', 'hide', 'bookmark', 'search'] as const
+export const interactionTypes = ['view', 'click', 'like', 'hide', 'bookmark', 'search'] as const
 
 export type InteractionType = (typeof interactionTypes)[number]
 

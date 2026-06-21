@@ -22,6 +22,7 @@ type CourseCardProps = {
   href?: string
   onLike?: (id: string) => void
   onHide?: (id: string) => void
+  onOpen?: (id: string) => void
   disableMetaLinks?: boolean
 }
 
@@ -42,6 +43,7 @@ export default function CourseCard({
   href,
   onLike,
   onHide,
+  onOpen,
   disableMetaLinks = false
 }: CourseCardProps): JSX.Element {
   const [liked, setLiked] = useState(false)
@@ -58,6 +60,10 @@ export default function CourseCard({
 
     setLiked(true)
     onLike?.(id)
+  }
+
+  const handleOpen = () => {
+    onOpen?.(id)
   }
 
   const categoryHref = disableMetaLinks
@@ -103,7 +109,7 @@ export default function CourseCard({
   ) : null
 
   const courseTitle = href ? (
-    <Link href={href} className="card__title-link">
+    <Link href={href} className="card__title-link" onClick={handleOpen}>
       <h3 className="card__title card__title--clamped">{title}</h3>
     </Link>
   ) : (
@@ -164,7 +170,7 @@ export default function CourseCard({
     <div className="card card--course">
       <div className="card__media">
         {href ? (
-          <Link href={href} className="card__media-link" aria-label={`Открыть курс ${title}`}>
+          <Link href={href} className="card__media-link" aria-label={`Открыть курс ${title}`} onClick={handleOpen}>
             <Image src={image} alt={title} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="card__image" unoptimized={isSvgImage} />
           </Link>
         ) : (

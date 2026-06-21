@@ -23,6 +23,7 @@ import {
   type CatalogLevel,
   type CatalogSort
 } from '../lib/catalogFilters'
+import { sendCourseInteraction } from '../lib/recommendations/client'
 import { getCatalogCategoriesFromDatabase, getCoursesFromDatabase } from '../lib/server/courseRepository'
 import type { CatalogCategory, Course } from '../lib/types'
 
@@ -97,6 +98,10 @@ export default function Catalog({ catalogCategories, courses }: CatalogProps): J
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     updateFilters({ search: searchTerm })
+  }
+
+  const handleOpenCourse = (courseId: string) => {
+    void sendCourseInteraction(courseId, 'click').catch(() => undefined)
   }
 
   const filteredCourses = filterCourses({
@@ -179,7 +184,7 @@ export default function Catalog({ catalogCategories, courses }: CatalogProps): J
         <section className="page-container section">
           <h2 className="sr-only">Список курсов</h2>
           {filteredCourses.length > 0 ? (
-            <CourseGrid courses={filteredCourses} />
+            <CourseGrid courses={filteredCourses} onOpen={handleOpenCourse} />
           ) : (
             <EmptyState
               title="Курсы не найдены"

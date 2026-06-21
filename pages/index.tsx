@@ -158,7 +158,7 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
     }
   }
 
-  const saveInteraction = async (courseId: string, type: 'hide' | 'like'): Promise<void> => {
+  const saveInteraction = async (courseId: string, type: 'click' | 'hide' | 'like'): Promise<void> => {
     try {
       await sendCourseInteraction(courseId, type)
     } catch {
@@ -210,6 +210,10 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
 
     await loadRecommendations(preferences, hiddenCourseIds)
     toast.success('Отметка учтена для будущих рекомендаций')
+  }
+
+  const handleOpenCourse = (courseId: string) => {
+    void saveInteraction(courseId, 'click')
   }
 
   if (!isAuthenticated) {
@@ -307,7 +311,12 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
               )}
             />
           ) : personalRecommendations.length > 0 ? (
-            <RecommendationCourseGrid items={personalRecommendations} onLike={handleLike} onHide={handleHide} />
+            <RecommendationCourseGrid
+              items={personalRecommendations}
+              onLike={handleLike}
+              onHide={handleHide}
+              onOpen={handleOpenCourse}
+            />
           ) : (
             <EmptyState
               title="Все рекомендации скрыты"
@@ -337,7 +346,12 @@ export default function Home({ courses, learningCourses }: HomeProps): JSX.Eleme
               )}
             />
           ) : (
-            <RecommendationCourseGrid items={interestRecommendations} onLike={handleLike} onHide={handleHide} />
+            <RecommendationCourseGrid
+              items={interestRecommendations}
+              onLike={handleLike}
+              onHide={handleHide}
+              onOpen={handleOpenCourse}
+            />
           )}
         </RecommendationSection>
       </main>
